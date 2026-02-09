@@ -299,18 +299,7 @@ export default function TeacherDashboardPage() {
           </div>
         </motion.div>
       </div>
-
-      {/* Floating Action Button - Enhanced */}
-      <div className="fixed bottom-10 right-10 md:hidden z-50">
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setIsQuickOpen(true)}
-          className="h-20 w-20 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-800 text-white shadow-2xl flex items-center justify-center border-4 border-white/20 backdrop-blur-sm"
-        >
-          <Plus className="h-10 w-10" />
-        </motion.button>
-      </div>
     </div>
   )
 }
+

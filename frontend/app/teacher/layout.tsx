@@ -194,12 +194,13 @@ export default function TeacherLayout({
 
         {/* Sidebar Sheet - Single controlled instance */}
         <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
-          <SheetContent side="left" className="w-[280px] p-0 border-r-0 flex flex-col">
-            <div className="flex-1 flex flex-col overflow-hidden p-5 pt-10">
+          <SheetContent side="left" className="w-[280px] p-0 border-r-0">
+            <div className="h-full overflow-y-auto p-5 pt-12 pb-4">
               <TeacherSidebarContent onItemClick={() => setIsMobileOpen(false)} />
             </div>
           </SheetContent>
         </Sheet>
+
 
         {/* Desktop Sidebar */}
         <aside className="hidden md:flex w-72 flex-col border-r bg-white/50 backdrop-blur-sm p-6 h-screen sticky top-0 overflow-hidden z-10 transition-all duration-300">
