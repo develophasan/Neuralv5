@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from "@/components/ui"
 import { Clock, Play, Loader2, CheckCircle, XCircle, Bell, Brain, Calendar } from "lucide-react"
-import { useToast } from "@/components/ui/toaster"
+import { toast } from "sonner"
 
 interface JobResult {
   success: boolean
@@ -18,7 +18,6 @@ interface JobResult {
 }
 
 export default function AdminCronPage() {
-  const { toast } = useToast()
   // Track running state for each job independently
   const [runningJobs, setRunningJobs] = useState<Record<string, boolean>>({})
   const [results, setResults] = useState<Record<string, JobResult>>({})
@@ -53,7 +52,7 @@ export default function AdminCronPage() {
           secret: 'harmoni-cron-secret-2024',
         }),
       })
-      toast({ title: 'İşlem durduruluyor...', description: 'Durdurma komutu gönderildi.' })
+      toast.info("İşlem durduruluyor...", { description: "Durdurma komutu gönderildi." })
     } catch (e) {
       console.error(e)
     }
@@ -111,15 +110,13 @@ export default function AdminCronPage() {
                 ...prev,
                 [jobId]: data.result
               }))
-              toast({
-                title: 'İşlem Tamamlandı',
+              toast.success("İşlem Tamamlandı", {
                 description: `${data.result.sentCount} bildirim gönderildi.`,
-                variant: 'success'
               })
               // Mark as finished ONLY on complete
               setRunningJobs(prev => ({ ...prev, [jobId]: false }))
             } else if (data.type === 'error') {
-              toast({ title: 'Hata', description: data.error, variant: 'error' })
+              toast.error("Hata", { description: data.error })
               setRunningJobs(prev => ({ ...prev, [jobId]: false }))
             }
           } catch (e) {
@@ -128,10 +125,8 @@ export default function AdminCronPage() {
         }
       }
     } catch (error: any) {
-      toast({
-        title: 'Hata',
-        description: 'Bağlantı hatası',
-        variant: 'error',
+      toast.error("Hata", {
+        description: "Bağlantı hatası",
       })
       setRunningJobs(prev => ({ ...prev, [jobId]: false }))
     }

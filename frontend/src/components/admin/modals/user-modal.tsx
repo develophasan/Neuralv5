@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button, Input, Label } from "@/components/ui"
 import { Select } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
-import { useToast } from "@/components/ui/toaster"
+import { toast } from "sonner"
 
 interface UserModalProps {
   open: boolean
@@ -15,7 +15,6 @@ interface UserModalProps {
 }
 
 export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProps) {
-  const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
@@ -67,20 +66,12 @@ export function UserModal({ open, onOpenChange, user, onSuccess }: UserModalProp
         throw new Error(error.error || 'Bir hata oluştu')
       }
 
-      toast({
-        title: 'Başarılı!',
-        description: user ? 'Kullanıcı güncellendi' : 'Kullanıcı oluşturuldu',
-        variant: 'success',
-      })
+      toast.success(user ? 'Kullanıcı güncellendi' : 'Kullanıcı oluşturuldu')
 
       onOpenChange(false)
       onSuccess?.()
     } catch (error: any) {
-      toast({
-        title: 'Hata',
-        description: error.message,
-        variant: 'error',
-      })
+      toast.error(error.message)
     } finally {
       setLoading(false)
     }

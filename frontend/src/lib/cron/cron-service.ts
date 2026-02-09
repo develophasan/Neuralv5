@@ -1,14 +1,17 @@
 // Cron Job Service - Automatic AI Activity Recommendations
 import * as cron from 'node-cron'
 import { prisma } from '@/lib/db/prisma'
-import { generateActivityRecommendations, generateDevelopmentSummary } from '@/lib/ai/gemini-service'
+import { generateActivityRecommendations, generateDevelopmentSummary, selectBestActivity } from '@/lib/ai/gemini-service'
 
 // Types for detailed logging
 export interface JobLog {
   student: string
   parent: string
-  status: 'success' | 'skipped' | 'error'
+  status: 'success' | 'skipped' | 'error' | 'sent'
   message: string
+  type?: string
+  timestamp?: Date
+  studentId?: string // Added to match usage
 }
 
 export interface CronJobResult {
@@ -16,6 +19,7 @@ export interface CronJobResult {
   sentCount: number
   logs: JobLog[]
   error?: any
+  message?: string // Added to match usage
 }
 
 export interface JobOptions {
@@ -95,88 +99,36 @@ export async function sendActivityRecommendationsToParents(options?: JobOptions)
       }
 
       // Update log entry with real names
-      logEntry.student = `${student.firstName} ${student.lastName}`
-      logEntry.parent = parent.email
+      // Initial check for missing data
+      if (!parent || !student) {
+        logs.push({
+          student: student?.firstName || 'Unknown', // Added to satisfy interface
+          studentId: student?.id || 'Unknown',
+          parent: parent?.email || 'Unknown',
+          status: 'skipped',
+          message: 'Parent or Student data missing',
+          type: 'activity',
+          timestamp: new Date()
+        })
+        options?.onProgress?.(logs[logs.length - 1])
+        continue
+      }
 
       // Calculate age
       const birthDate = new Date(student.dateOfBirth)
       const today = new Date()
       const age = today.getFullYear() - birthDate.getFullYear()
 
-      // Find weak domains (score < 3)
-      const weakDomains: string[] = []
-      const lastAssessment = student.assessments?.[0]
-
-      if (lastAssessment?.scores) {
-        lastAssessment.scores.forEach((score: any) => {
-          if (score.score && score.score < 3) {
-            weakDomains.push(score.domain?.nameTr || 'Genel')
-          }
-        })
-      }
-
-      // Skip if no weak domains
-      if (weakDomains.length === 0) {
-        logEntry.message = 'No weak domains found'
-        logs.push(logEntry)
-        options?.onProgress?.(logEntry)
-        continue
-      }
-
-      try {
-        // Generate AI recommendations
-        const recommendations = await generateActivityRecommendations(
-          {
-            firstName: student.firstName,
-            lastName: student.lastName,
-            age,
-            assessments: student.assessments,
-          },
-          weakDomains
-        )
-
-        if (recommendations && recommendations.length > 0) {
-          // Create notification for parent
-          const activityNames = recommendations.slice(0, 2).map((r: any) => r.name).join(', ')
-
-          await prisma.notification.create({
-            data: {
-              recipientId: parent.id,
-              studentId: student.id,
-              type: 'activity',
-              senderType: 'ai',
-              title: `${student.firstName} için Aktivite Önerisi`,
-              message: `${student.firstName}'in gelişimi için önerilen aktiviteler: ${activityNames}. Detaylar için tıklayın.`,
-              actionUrl: `/parent/children/${student.id}`,
-              metadata: JSON.stringify({
-                weakDomains,
-                recommendations: recommendations.slice(0, 3),
-              }),
-            },
-          })
-
-          sentCount++
-          logEntry.status = 'success'
-          logEntry.message = `Sent: ${activityNames}`
-          console.log(`[CRON] Sent recommendation to ${parent.email} for ${student.firstName}`)
-        } else {
-          logEntry.message = 'AI returned no recommendations'
-        }
-      } catch (aiError: any) {
-        console.error(`[CRON] AI error for ${student.firstName}:`, aiError)
-        logEntry.status = 'error'
-        logEntry.message = `AI Error: ${aiError.message || aiError}`
-      }
-
-      logs.push(logEntry)
-      options?.onProgress?.(logEntry)
+      // Process single student
+      const result = await processStudentActivityRecommendation(student, parent, age, logs, options)
+      if (result) sentCount++
 
       // Rate limiting - wait between API calls
       await new Promise(resolve => setTimeout(resolve, 1000))
     }
 
     console.log(`[CRON] Completed! Sent ${sentCount} notifications.`)
-    return { success: true, sentCount, logs }
+    return { success: true, sentCount, logs, message: `Sent ${sentCount} activity recommendations` }
   } catch (error: any) {
     console.error('[CRON] Error in activity recommendations job:', error)
     return { success: false, sentCount: 0, logs: [], error: error.message || error }
@@ -326,5 +278,158 @@ export async function runJob(jobName: 'activity-recommendations' | 'daily-summar
       return await sendDailySummariesToParents()
     default:
       return { success: false, sentCount: 0, logs: [], error: 'Unknown job' }
+  }
+}
+
+// Process single student activity recommendation
+export async function processStudentActivityRecommendation(
+  student: any,
+  parent: any,
+  age: number,
+  logs: JobLog[],
+  options?: JobOptions
+): Promise<boolean> {
+  const logEntry: JobLog = {
+    student: student.firstName,
+    parent: parent.email,
+    status: 'skipped',
+    message: ''
+  }
+
+  // Find weak domains (score < 3)
+  // Store full domain objects to query DB
+  const weakDomainIds: string[] = []
+  const weakDomainNames: string[] = []
+  const lastAssessment = student.assessments?.[0]
+
+  if (lastAssessment?.scores) {
+    lastAssessment.scores.forEach((score: any) => {
+      if (score.score && score.score < 3) {
+        if (score.domain) {
+          weakDomainIds.push(score.domain.id)
+          weakDomainNames.push(score.domain.nameTr)
+        }
+      }
+    })
+  }
+
+  // Skip if no weak domains
+  if (weakDomainIds.length === 0) {
+    logEntry.message = 'No weak domains found'
+    logs.push(logEntry)
+    options?.onProgress?.(logEntry)
+    return false
+  }
+
+  try {
+    const recommendations: any[] = []
+
+    // Strategy: Try to find vetted DB activities for the first weak domain
+    // If not found, fall back to generative AI
+    const targetDomainId = weakDomainIds[0]
+    const targetDomainName = weakDomainNames[0]
+
+    const dbActivities = await prisma.activity.findMany({
+      where: {
+        domainId: targetDomainId,
+        ageMin: { lte: age },
+        ageMax: { gte: age },
+        isActive: true,
+      }
+    })
+
+    if (dbActivities.length > 0) {
+      // VETTED PATH: Select best from DB
+      console.log(`[CRON] Found ${dbActivities.length} vetted activities for ${student.firstName} in ${targetDomainName}`)
+      const bestActivity = await selectBestActivity(
+        {
+          firstName: student.firstName,
+          lastName: student.lastName,
+          age,
+          assessments: student.assessments,
+        },
+        targetDomainName,
+        dbActivities
+      )
+
+      if (bestActivity) {
+        recommendations.push({
+          name: bestActivity.title,
+          description: bestActivity.description,
+          reasoning: bestActivity.aiReasoning || `Bu aktivite ${targetDomainName} gelişimini destekler.`,
+          dbId: bestActivity.id
+        })
+
+        // Create recommendation record in DB
+        await prisma.activityRecommendation.create({
+          data: {
+            studentId: student.id,
+            activityId: bestActivity.id,
+            domainId: targetDomainId,
+            reason: bestActivity.aiReasoning || 'AI tarafından seçildi',
+            recommendedTo: 'parent',
+            status: 'pending'
+          }
+        })
+      }
+    } else {
+      // HALLUCINATION PATH (Fallback): Generate new
+      console.log(`[CRON] No vetted activities found for ${targetDomainName}. Falling back to generation.`)
+      const generated = await generateActivityRecommendations(
+        {
+          firstName: student.firstName,
+          lastName: student.lastName,
+          age,
+          assessments: student.assessments,
+        },
+        [targetDomainName]
+      )
+      if (generated && generated.length > 0) {
+        recommendations.push(...generated)
+      }
+    }
+
+    if (recommendations.length > 0) {
+      // Create notification for parent
+      const activityNames = recommendations.map((r: any) => r.name).join(', ')
+      const firstRec = recommendations[0]
+
+      await prisma.notification.create({
+        data: {
+          recipientId: parent.id,
+          studentId: student.id,
+          type: 'activity',
+          senderType: 'ai',
+          title: `${student.firstName} için Özel Aktivite Önerisi`,
+          message: firstRec.reasoning
+            ? `${firstRec.reasoning} Önerilen: ${firstRec.name}`
+            : `${student.firstName}'in ${targetDomainName} gelişimi için öneri: ${firstRec.name}`,
+          actionUrl: `/parent/children/${student.id}`,
+          metadata: JSON.stringify({
+            weakDomains: weakDomainNames,
+            recommendations: recommendations,
+            isVetted: !!firstRec.dbId
+          }),
+        },
+      })
+
+      logEntry.status = 'success'
+      logEntry.message = `Sent recommended activities: ${activityNames}`
+      logs.push(logEntry)
+      options?.onProgress?.(logEntry)
+      return true
+    } else {
+      logEntry.message = 'No recommendations generated'
+      logs.push(logEntry)
+      options?.onProgress?.(logEntry)
+      return false
+    }
+
+  } catch (error) {
+    logEntry.status = 'error'
+    logEntry.message = `Error processing student: ${error}`
+    logs.push(logEntry)
+    options?.onProgress?.(logEntry)
+    return false
   }
 }

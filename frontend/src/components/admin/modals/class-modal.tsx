@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button, Input, Label } from "@/components/ui"
 import { Select } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
-import { useToast } from "@/components/ui/toaster"
+import { toast } from "sonner"
 
 interface ClassModalProps {
   open: boolean
@@ -15,7 +15,6 @@ interface ClassModalProps {
 }
 
 export function ClassModal({ open, onOpenChange, classData, onSuccess }: ClassModalProps) {
-  const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -64,20 +63,12 @@ export function ClassModal({ open, onOpenChange, classData, onSuccess }: ClassMo
         throw new Error(error.error || 'Bir hata oluştu')
       }
 
-      toast({
-        title: 'Başarılı!',
-        description: classData ? 'Sınıf güncellendi' : 'Sınıf oluşturuldu',
-        variant: 'success',
-      })
+      toast.success(classData ? 'Sınıf güncellendi' : 'Sınıf oluşturuldu')
 
       onOpenChange(false)
       onSuccess?.()
     } catch (error: any) {
-      toast({
-        title: 'Hata',
-        description: error.message,
-        variant: 'error',
-      })
+      toast.error(error.message)
     } finally {
       setLoading(false)
     }

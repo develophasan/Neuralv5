@@ -87,5 +87,16 @@ export const THEME_PALETTES: Record<string, ThemePalette> = {
         pageBg: '#f5f5f4',
         textPrimary: '#1c1917',
         textSidebar: '#d6d3d1'
+    },
+    premium: {
+        name: 'premium',
+        label: 'Premium Vizyon (Safir & Safir)',
+        primary: '#6366f1',
+        secondary: '#f59e0b',
+        sidebarBg: '#1e1b4b',
+        sidebarBorder: '#312e81',
+        pageBg: '#f8fafc',
+        textPrimary: '#1e1b4b',
+        textSidebar: '#c7d2fe'
     }
 };

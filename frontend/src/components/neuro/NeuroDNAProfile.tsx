@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts"
-import { Brain, TrendingUp, TrendingDown, AlertCircle } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui"
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts"
+import { Brain, TrendingUp, TrendingDown, AlertCircle, Info } from "lucide-react"
 
 interface NeuroProfile {
   executiveScore: number
@@ -53,12 +53,12 @@ export function NeuroDNAProfile({ studentId }: NeuroDNAProfileProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-neuro-purple" />
-            🧠 Neuro DNA Profile
+            🧠 Neuro DNA Profile (V3)
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64">
-            <p className="text-muted-foreground">Yükleniyor...</p>
+            <p className="text-muted-foreground">Analiz ediliyor...</p>
           </div>
         </CardContent>
       </Card>
@@ -71,12 +71,15 @@ export function NeuroDNAProfile({ studentId }: NeuroDNAProfileProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-neuro-purple" />
-            🧠 Neuro DNA Profile
+            🧠 Neuro DNA Profile (V3)
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64">
-            <p className="text-muted-foreground">Henüz değerlendirme verisi yok.</p>
+            <div className="text-center">
+              <p className="text-muted-foreground mb-2">Henüz Neuro-Analiz verisi yok.</p>
+              <p className="text-xs text-muted-foreground">Z-Skor motoru haftalık çalışır.</p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -85,29 +88,65 @@ export function NeuroDNAProfile({ studentId }: NeuroDNAProfileProps) {
 
   // Prepare data for radar chart
   const chartData = [
-    { domain: "Yürütücü", value: profile.executiveScore },
-    { domain: "Dil", value: profile.languageScore },
-    { domain: "Duygusal", value: profile.emotionalScore },
-    { domain: "Kaba Motor", value: profile.grossMotorScore },
-    { domain: "İnce Motor", value: profile.fineMotorScore },
-    { domain: "Mantıksal", value: profile.logicScore },
-    { domain: "Yaratıcı", value: profile.creativeScore },
-    { domain: "Mekansal", value: profile.spatialScore },
-    { domain: "Keşif", value: profile.discoveryScore },
-    { domain: "Bağımsızlık", value: profile.independenceScore },
+    { domain: "Yürütücü", value: profile.executiveScore, fullMark: 100 },
+    { domain: "Dil", value: profile.languageScore, fullMark: 100 },
+    { domain: "Duygusal", value: profile.emotionalScore, fullMark: 100 },
+    { domain: "Kaba Motor", value: profile.grossMotorScore, fullMark: 100 },
+    { domain: "İnce Motor", value: profile.fineMotorScore, fullMark: 100 },
+    { domain: "Mantıksal", value: profile.logicScore, fullMark: 100 },
+    { domain: "Yaratıcı", value: profile.creativeScore, fullMark: 100 },
+    { domain: "Mekansal", value: profile.spatialScore, fullMark: 100 },
+    { domain: "Keşif", value: profile.discoveryScore, fullMark: 100 },
+    { domain: "Bağımsızlık", value: profile.independenceScore, fullMark: 100 },
   ]
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border rounded-lg shadow-lg">
+          <p className="font-bold text-sm mb-1">{label}</p>
+          <p className="text-xs text-indigo-600 font-semibold">
+            %{payload[0].value.toFixed(1)} Persentil
+          </p>
+          <p className="text-[10px] text-muted-foreground mt-1">
+            (Yaşıtlarına göre konumu)
+          </p>
+        </div>
+      )
+    }
+    return null
+  }
 
   return (
     <Card className="rounded-2xl shadow-harmony border-0 bg-gradient-to-br from-white to-harmony-soft/50">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <Brain className="h-6 w-6 text-neuro-purple" />
-          🧠 Neuro DNA Profile
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Brain className="h-6 w-6 text-neuro-purple" />
+            🧠 Neuro DNA Profile
+          </CardTitle>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Info className="h-4 w-4 text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-[200px] text-xs">
+                  Bu grafik öğrencinin gelişimini yaşıtlarına göre kıyaslar (Persentil). %50 ortalamayı temsil eder.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Radar Chart */}
-        <div className="h-80 w-full">
+        <div className="h-80 w-full relative">
+          <div className="absolute top-0 right-0 z-10">
+            <span className="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-500">
+              V3 Neuro-Engine Aktif
+            </span>
+          </div>
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={chartData}>
               <PolarGrid stroke="#e2e8f0" />
@@ -119,15 +158,17 @@ export function NeuroDNAProfile({ studentId }: NeuroDNAProfileProps) {
                 angle={90}
                 domain={[0, 100]}
                 tick={{ fill: "#94a3b8", fontSize: 10 }}
+                tickFormatter={(value) => `%${value}`}
               />
               <Radar
-                name="Gelişim Skoru"
+                name="Gelişim Persentili"
                 dataKey="value"
                 stroke="#6366F1"
                 fill="#6366F1"
                 fillOpacity={0.3}
                 strokeWidth={2}
               />
+              <RechartsTooltip content={<CustomTooltip />} />
             </RadarChart>
           </ResponsiveContainer>
         </div>
@@ -141,7 +182,7 @@ export function NeuroDNAProfile({ studentId }: NeuroDNAProfileProps) {
                 <div className="p-4 rounded-xl bg-gradient-to-br from-neuro-green/10 to-neuro-green/5 border border-neuro-green/20">
                   <div className="flex items-center gap-2 mb-2">
                     <TrendingUp className="h-4 w-4 text-neuro-green" />
-                    <h4 className="font-semibold text-sm text-neuro-green">Güçlü Alanlar</h4>
+                    <h4 className="font-semibold text-sm text-neuro-green">Güçlü Alanlar (%85+)</h4>
                   </div>
                   <ul className="space-y-1">
                     {profile.derived.dominantAreas.map((area, i) => (
@@ -158,7 +199,7 @@ export function NeuroDNAProfile({ studentId }: NeuroDNAProfileProps) {
                 <div className="p-4 rounded-xl bg-gradient-to-br from-risk-red/10 to-risk-red/5 border border-risk-red/20">
                   <div className="flex items-center gap-2 mb-2">
                     <AlertCircle className="h-4 w-4 text-risk-red" />
-                    <h4 className="font-semibold text-sm text-risk-red">Dikkat Gereken</h4>
+                    <h4 className="font-semibold text-sm text-risk-red">Destek Gereken (%25-)</h4>
                   </div>
                   <ul className="space-y-1">
                     {profile.derived.riskAreas.map((area, i) => (
@@ -191,9 +232,12 @@ export function NeuroDNAProfile({ studentId }: NeuroDNAProfileProps) {
             {/* Average Score */}
             <div className="pt-4 border-t">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Ortalama Gelişim Skoru</span>
-                <span className="text-2xl font-bold font-mono text-harmony-brain">
-                  {profile.derived.avgScore ? profile.derived.avgScore.toFixed(1) : '0.0'}%
+                <div>
+                  <span className="text-sm text-muted-foreground block">Genel Gelişim Endeksi</span>
+                  <span className="text-[10px] text-muted-foreground/60">(Tüm alanların persentil ortalaması)</span>
+                </div>
+                <span className="text-3xl font-bold font-mono text-harmony-brain text-indigo-600">
+                  %{profile.derived.avgScore ? profile.derived.avgScore.toFixed(0) : '0'}
                 </span>
               </div>
             </div>
@@ -203,4 +247,3 @@ export function NeuroDNAProfile({ studentId }: NeuroDNAProfileProps) {
     </Card>
   )
 }
-

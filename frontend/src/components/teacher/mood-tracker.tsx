@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from "@/components/ui"
 import { Select } from "@/components/ui/select"
 import { Smile, Meh, Frown, Zap, Users, Save, Loader2 } from "lucide-react"
-import { useToast } from "@/components/ui/toaster"
+import { toast } from "sonner"
 
 interface MoodTrackerProps {
   students: any[]
@@ -36,7 +36,6 @@ const SOCIAL_OPTIONS = [
 ]
 
 export function MoodTracker({ students, onSuccess }: MoodTrackerProps) {
-  const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState('')
   const [mood, setMood] = useState('')
@@ -48,7 +47,7 @@ export function MoodTracker({ students, onSuccess }: MoodTrackerProps) {
     e.preventDefault()
 
     if (!selectedStudent || !mood) {
-      toast({ title: 'Hata', description: 'Lütfen öğrenci ve duygu durumu seçin', variant: 'error' })
+      toast.error('Lütfen öğrenci ve duygu durumu seçin')
       return
     }
 
@@ -69,15 +68,15 @@ export function MoodTracker({ students, onSuccess }: MoodTrackerProps) {
 
       if (!res.ok) throw new Error('Kaydedilemedi')
 
-      toast({ title: 'Başarılı!', description: 'Duygu durumu kaydedildi', variant: 'success' })
-      
+      toast.success('Duygu durumu kaydedildi')
+
       // Reset form
       setSelectedStudent('')
       setMood('')
       setNotes('')
       onSuccess?.()
     } catch (error) {
-      toast({ title: 'Hata', description: 'Bir hata oluştu', variant: 'error' })
+      toast.error('Bir hata oluştu')
     } finally {
       setLoading(false)
     }

@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
-import { Button, Input, Label } from "@/components/ui"
-import { Select } from "@/components/ui/select"
+import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui"
 import { Loader2 } from "lucide-react"
-import { useToast } from "@/components/ui/toaster"
+import { toast } from "sonner"
 
 interface StudentModalProps {
   open: boolean
@@ -16,7 +15,6 @@ interface StudentModalProps {
 }
 
 export function StudentModal({ open, onOpenChange, student, classes = [], onSuccess }: StudentModalProps) {
-  const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     firstName: '',
@@ -76,20 +74,12 @@ export function StudentModal({ open, onOpenChange, student, classes = [], onSucc
         throw new Error(error.error || 'Bir hata oluştu')
       }
 
-      toast({
-        title: 'Başarılı!',
-        description: student ? 'Öğrenci güncellendi' : 'Öğrenci oluşturuldu',
-        variant: 'success',
-      })
+      toast.success(student ? 'Öğrenci güncellendi' : 'Öğrenci oluşturuldu')
 
       onOpenChange(false)
       onSuccess?.()
     } catch (error: any) {
-      toast({
-        title: 'Hata',
-        description: error.message,
-        variant: 'error',
-      })
+      toast.error(error.message)
     } finally {
       setLoading(false)
     }
@@ -148,13 +138,16 @@ export function StudentModal({ open, onOpenChange, student, classes = [], onSucc
             <div className="space-y-2">
               <Label htmlFor="gender">Cinsiyet *</Label>
               <Select
-                id="gender"
                 value={formData.gender}
-                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                className="rounded-xl"
+                onValueChange={(value) => setFormData({ ...formData, gender: value })}
               >
-                <option value="male">Erkek</option>
-                <option value="female">Kız</option>
+                <SelectTrigger id="gender" className="rounded-xl">
+                  <SelectValue placeholder="Cinsiyet Seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Erkek</SelectItem>
+                  <SelectItem value="female">Kız</SelectItem>
+                </SelectContent>
               </Select>
             </div>
           </div>
@@ -162,17 +155,20 @@ export function StudentModal({ open, onOpenChange, student, classes = [], onSucc
           <div className="space-y-2">
             <Label htmlFor="classId">Sınıf</Label>
             <Select
-              id="classId"
               value={formData.classId}
-              onChange={(e) => setFormData({ ...formData, classId: e.target.value })}
-              className="rounded-xl"
+              onValueChange={(value) => setFormData({ ...formData, classId: value })}
             >
-              <option value="">Sınıf Seçin</option>
-              {classes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
+              <SelectTrigger id="classId" className="rounded-xl">
+                <SelectValue placeholder="Sınıf Seçin" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sınıf Seçin</SelectItem>
+                {classes.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
 

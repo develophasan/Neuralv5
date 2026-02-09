@@ -64,6 +64,7 @@ model Student {
   photoUrl       String?  @map("photo_url")
   enrollmentDate DateTime @default(now()) @map("enrollment_date")
   isActive       Boolean  @default(true) @map("is_active")
+  neuroPoints    Int      @default(0) @map("neuro_points")
   
   // Kimlik Bilgileri
   tcNo           String?  @map("tc_no")
@@ -219,6 +220,18 @@ model DevelopmentDomain {
   activityRecommendations ActivityRecommendation[]
 
   @@map("development_domains")
+}
+
+model NeuroNorm {
+  id          String   @id @default(uuid())
+  domainCode  String   @map("domain_code") // e.g., 'social_emotional'
+  ageMonth    Int      @map("age_month")   // e.g., 48
+  mean        Float
+  stdDev      Float    @map("std_dev")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([domainCode, ageMonth])
+  @@map("neuro_norms")
 }
 
 model Assessment {

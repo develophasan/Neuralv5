@@ -166,57 +166,75 @@
   }
 
   /* ========================================
-     TEACHER STYLES - Playful/Touch-First
+     TEACHER STYLES - Premium Revamp
      ======================================== */
   .teacher-layout {
-    @apply bg-gradient-hero min-h-screen;
+    @apply min-h-screen selection:bg-sapphire-100 selection:text-sapphire-900;
+    background-color: #f8fafc;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
   }
 
   .teacher-sidebar {
-    background-color: hsl(var(--sidebar-bg) / 0.95);
-    color: hsl(var(--text-sidebar));
-    border-right: 1px solid hsl(var(--sidebar-border));
-    @apply w-72 backdrop-blur-md min-h-screen p-6 transition-colors duration-300;
+    background: linear-gradient(180deg, #1e1b4b 0%, #1e1b4b 100%);
+    color: #c7d2fe;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    @apply w-72 min-h-screen p-6 transition-all duration-300 shadow-2xl;
   }
 
   .teacher-sidebar-item {
-    @apply flex items-center gap-4 px-5 py-4 rounded-2xl text-base font-medium transition-all duration-200;
-    color: hsl(var(--text-sidebar));
+    @apply flex items-center gap-4 px-5 py-4 rounded-2xl text-base font-medium transition-all duration-300 opacity-80;
+    color: #c7d2fe;
   }
 
   .teacher-sidebar-item:hover {
-    background-color: hsl(var(--primary) / 0.1);
-    color: hsl(var(--primary));
+    background-color: rgba(255, 255, 255, 0.05);
+    @apply opacity-100 translate-x-1;
   }
 
   .teacher-sidebar-item.active {
-    background-color: hsl(var(--primary));
-    color: hsl(var(--primary-foreground, 0 0% 100%));
-    @apply shadow-lg;
+    background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    @apply shadow-lg shadow-indigo-500/20 opacity-100;
   }
 
-  .teacher-card {
-    @apply bg-white rounded-3xl border-2 border-stone-100 shadow-soft-md p-6 hover:shadow-soft-lg transition-all duration-300;
+  .teacher-card-premium {
+    @apply bg-white rounded-[2rem] border border-stone-100 shadow-[0_8px_30px_#0000000a] p-8 hover:shadow-[0_20px_40px_#00000014] transition-all duration-500 overflow-hidden relative;
   }
 
-  .teacher-stat-card {
-    @apply bg-white rounded-3xl border-2 border-stone-100 shadow-soft-md p-6 hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300;
+  .teacher-stat-card-premium {
+    @apply bg-white rounded-3xl border border-stone-100 shadow-soft p-6 hover:shadow-soft-xl hover:-translate-y-2 transition-all duration-500;
+  }
+
+  .teacher-btn-premium {
+    @apply h-14 px-10 text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3;
   }
 
   .teacher-btn {
-    @apply h-14 px-8 text-lg font-semibold rounded-full shadow-brand hover:shadow-brand-lg hover:scale-105 transition-all duration-200;
+    @apply h-12 px-6 font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2;
+  }
+
+  .glow-sapphire {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
   }
 
   .teacher-btn-primary {
-    @apply teacher-btn bg-brand-500 text-white hover:bg-brand-600;
+    @apply teacher-btn bg-sapphire-600 text-white hover:bg-sapphire-700 shadow-lg shadow-indigo-200;
   }
 
   .teacher-btn-play {
-    @apply teacher-btn bg-play-500 text-white hover:bg-play-600 shadow-play;
+    @apply teacher-btn bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-100;
   }
 
   .teacher-input {
-    @apply h-14 text-lg rounded-2xl border-2 border-stone-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 px-5;
+    @apply h-14 text-lg rounded-2xl border-2 border-stone-100 bg-white/50 focus:border-sapphire-500 focus:ring-2 focus:ring-indigo-100 px-5 outline-none transition-all;
   }
 
   /* Touch-friendly grid for tablet */
@@ -311,23 +329,23 @@
 
   /* Stagger animation delay */
   .stagger-1 {
-    animation-delay: 0.05s;
+    @apply [animation-delay:0.05s];
   }
 
   .stagger-2 {
-    animation-delay: 0.1s;
+    @apply [animation-delay:0.1s];
   }
 
   .stagger-3 {
-    animation-delay: 0.15s;
+    @apply [animation-delay:0.15s];
   }
 
   .stagger-4 {
-    animation-delay: 0.2s;
+    @apply [animation-delay:0.2s];
   }
 
   .stagger-5 {
-    animation-delay: 0.25s;
+    @apply [animation-delay:0.25s];
   }
 
   /* ========================================
@@ -441,6 +459,20 @@
   /* Text gradient */
   .text-gradient-brand {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-700 to-brand-500;
+  }
+
+  /* Premium Backgrounds */
+  .bg-mesh-gradient {
+    background-color: #f8fafc;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
+  }
+
+  .glass-card-premium {
+    @apply bg-white/70 backdrop-blur-xl border border-white/50 shadow-2xl shadow-indigo-100/20;
   }
 
   /* Safe area padding for mobile */

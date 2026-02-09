@@ -1,18 +1,24 @@
-// List all development domains
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
-import { handleApiError } from '@/lib/api/errors'
-import { successResponse } from '@/lib/api/utils'
 
-// GET /api/domains - List all domains
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const domains = await prisma.developmentDomain.findMany({
-      orderBy: { nameTr: 'asc' },
+      orderBy: { code: 'asc' },
+      select: {
+        id: true,
+        nameTr: true,
+        code: true,
+        iconName: true,
+        color: true
+      }
     })
 
-    return successResponse(domains)
-  } catch (error) {
-    return handleApiError(error)
+    return NextResponse.json({ success: true, data: domains })
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error.message || 'Internal Server Error' },
+      { status: 500 }
+    )
   }
 }

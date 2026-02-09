@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input, Label } from "@/components/ui"
 import { Select } from "@/components/ui/select"
 import { Utensils, Moon, Droplets, Save, Loader2 } from "lucide-react"
-import { useToast } from "@/components/ui/toaster"
+import { toast } from "sonner"
 
 interface DailyLogFormProps {
   students: any[]
@@ -30,7 +30,6 @@ const TOILET_OPTIONS = [
 ]
 
 export function DailyLogForm({ students, onSuccess }: DailyLogFormProps) {
-  const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     studentId: '',
@@ -47,7 +46,7 @@ export function DailyLogForm({ students, onSuccess }: DailyLogFormProps) {
     e.preventDefault()
 
     if (!formData.studentId) {
-      toast({ title: 'Hata', description: 'Lütfen bir öğrenci seçin', variant: 'error' })
+      toast.error('Lütfen bir öğrenci seçin')
       return
     }
 
@@ -75,11 +74,7 @@ export function DailyLogForm({ students, onSuccess }: DailyLogFormProps) {
         throw new Error(error.error || 'Günlük log kaydedilemedi')
       }
 
-      toast({
-        title: 'Başarılı!',
-        description: 'Günlük log kaydedildi',
-        variant: 'success',
-      })
+      toast.success('Günlük log kaydedildi')
 
       // Reset form
       setFormData({
@@ -94,11 +89,7 @@ export function DailyLogForm({ students, onSuccess }: DailyLogFormProps) {
       })
       onSuccess?.()
     } catch (error: any) {
-      toast({
-        title: 'Hata',
-        description: error.message,
-        variant: 'error',
-      })
+      toast.error(error.message)
     } finally {
       setLoading(false)
     }

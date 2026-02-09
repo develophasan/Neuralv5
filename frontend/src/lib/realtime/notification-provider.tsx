@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
-import { useToast } from '@/components/ui/toaster'
+import { toast } from "sonner"
 
 interface Notification {
   id: string
@@ -26,17 +26,16 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
 
-export function NotificationProvider({ 
-  children, 
-  userId 
-}: { 
+export function NotificationProvider({
+  children,
+  userId
+}: {
   children: ReactNode
-  userId?: string 
+  userId?: string
 }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [lastFetchedIds, setLastFetchedIds] = useState<Set<string>>(new Set())
-  const { toast } = useToast()
 
   // Calculate unread count
   const unreadCount = notifications.filter(n => !n.isRead).length
@@ -48,23 +47,21 @@ export function NotificationProvider({
     try {
       const res = await fetch(`/napi/notifications?recipientId=${userId}&limit=50`)
       if (!res.ok) throw new Error('Failed to fetch')
-      
+
       const data = await res.json()
       const newNotifications = data.data || []
-      
+
       // Check for new notifications to show toast
       const currentIds = new Set(notifications.map(n => n.id))
       newNotifications.forEach((n: Notification) => {
         if (!currentIds.has(n.id) && !lastFetchedIds.has(n.id) && !n.isRead) {
           // New notification - show toast
-          toast({
-            title: n.title,
+          toast(n.title, {
             description: n.message,
-            variant: n.type === 'alert' || n.type === 'warning' ? 'warning' : 'default',
           })
         }
       })
-      
+
       setLastFetchedIds(new Set(newNotifications.map((n: Notification) => n.id)))
       setNotifications(newNotifications)
     } catch (error) {
@@ -83,7 +80,7 @@ export function NotificationProvider({
   // Polling every 30 seconds
   useEffect(() => {
     if (!userId) return
-    
+
     const interval = setInterval(fetchNotifications, 30000)
     return () => clearInterval(interval)
   }, [userId, fetchNotifications])
@@ -96,7 +93,7 @@ export function NotificationProvider({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isRead: true }),
       })
-      setNotifications(prev => 
+      setNotifications(prev =>
         prev.map(n => n.id === id ? { ...n, isRead: true } : n)
       )
     } catch (error) {
@@ -156,10 +153,10 @@ export function useNotifications() {
       notifications: [],
       unreadCount: 0,
       isLoading: false,
-      markAsRead: async () => {},
-      markAllAsRead: async () => {},
-      deleteNotification: async () => {},
-      refetch: async () => {},
+      markAsRead: async () => { },
+      markAllAsRead: async () => { },
+      deleteNotification: async () => { },
+      refetch: async () => { },
     }
   }
   return context
