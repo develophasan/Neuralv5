@@ -64,6 +64,7 @@ export default function TeacherProfilePage() {
                 await updateSession({
                     name: formData.fullName,
                     email: formData.email,
+                    image: data.data.avatarUrl,
                 })
                 setFormData(prev => ({ ...prev, password: "" }))
             } else {
