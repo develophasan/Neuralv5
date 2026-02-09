@@ -4,13 +4,16 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Input } from "@/components/ui"
 import { GraduationCap, Search, ArrowRight, X } from "lucide-react"
 import Link from "next/link"
-import { useTeacherId, useTeacherStudents } from "@/hooks/api/use-teacher"
+import { useTeacherId, useTeacherStudents, useTeacherClasses } from "@/hooks/api/use-teacher"
 import { motion, AnimatePresence } from "framer-motion"
 
 export default function TeacherStudentsPage() {
   const { data: teacherId, isLoading: teacherIdLoading, error: teacherIdError } = useTeacherId()
   const { data: students = [], isLoading: studentsLoading, error: studentsError } = useTeacherStudents(teacherId || null)
+  const { data: classes = [] } = useTeacherClasses(teacherId || null)
   const [search, setSearch] = useState("")
+
+  const primaryClassName = classes[0]?.name || "Tüm"
 
   const loading = teacherIdLoading || studentsLoading
   const error = teacherIdError || studentsError
@@ -70,7 +73,7 @@ export default function TeacherStudentsPage() {
             animate={{ opacity: 1, x: 0 }}
           >
             <h1 className="text-4xl md:text-5xl font-heading font-extrabold text-slate-900 mb-3 tracking-tight">
-              Geleceğin <span className="text-transparent bg-clip-text bg-gradient-to-r from-sapphire-600 to-indigo-600">Yıldızları</span>
+              {primaryClassName} <span className="text-transparent bg-clip-text bg-gradient-to-r from-sapphire-600 to-indigo-600">Öğrencilerimiz</span>
             </h1>
             <p className="text-slate-500 text-xl font-medium">
               Sınıfındaki tüm minik kahramanlara buradan ulaşabilirsin.
@@ -135,9 +138,13 @@ export default function TeacherStudentsPage() {
                                 <GraduationCap className="h-10 w-10 text-sapphire-600 transform -rotate-6" />
                               )}
                             </div>
-                            <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${student.gender === 'male' ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-600'
+                            <div className={`p-2 rounded-xl border ${student.gender === 'male' ? 'bg-indigo-50 border-indigo-100 text-indigo-600' : 'bg-rose-50 border-rose-100 text-rose-600'
                               }`}>
-                              {student.gender === 'male' ? 'Prens' : 'Prenses'}
+                              {student.gender === 'male' ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path><path d="M10 14l-2 -2"></path><path d="M12 12l1 1"></path><path d="M15 15l-4 -4"></path><path d="M11 7l4 4"></path></svg>
+                              ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 11m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"></path><path d="M12 16v5"></path><path d="M15 11l-3 3"></path><path d="M12 14l-3 -3"></path><path d="M9 19h6"></path></svg>
+                              )}
                             </div>
                           </div>
 

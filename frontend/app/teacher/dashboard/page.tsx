@@ -115,7 +115,7 @@ export default function TeacherDashboardPage() {
           <Button
             onClick={() => setIsQuickOpen(true)}
             size="lg"
-            className="bg-neuro-purple hover:bg-neuro-purple/90 text-white rounded-2xl shadow-lg shadow-neuro-purple/20 h-14 px-8 text-lg font-bold"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-lg shadow-indigo-200 h-14 px-8 text-lg font-bold"
           >
             <Brain className="mr-2 h-6 w-6" />
             Hızlı Değerlendirme
@@ -344,7 +344,7 @@ export default function TeacherDashboardPage() {
                       </div>
                     ) : (
                       <p className="text-white text-lg font-medium leading-relaxed">
-                        "{insight?.advice || 'Veri bekleniyor...'}"
+                        "{insight?.advice || 'Günlük verilerin tamamlanması bekleniyor...'}"
                       </p>
                     )}
                   </div>

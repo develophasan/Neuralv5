@@ -6,7 +6,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export function NotificationBell() {
+export function NotificationBell({ align = 'down' }: { align?: 'up' | 'down' }) {
   const {
     notifications,
     unreadCount,
@@ -79,11 +79,11 @@ export function NotificationBell() {
             />
 
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              initial={{ opacity: 0, y: align === 'down' ? -10 : 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              exit={{ opacity: 0, y: align === 'down' ? -10 : 10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-xl border z-50 overflow-hidden"
+              className={`absolute right-0 ${align === 'down' ? 'top-full mt-2' : 'bottom-full mb-2'} w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-xl border z-50 overflow-hidden`}
               style={{ maxHeight: 'calc(100vh - 120px)' }}
             >
               {/* Header */}
