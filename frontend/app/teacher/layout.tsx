@@ -104,26 +104,23 @@ function TeacherSidebarContent({ onItemClick }: { onItemClick?: () => void }) {
       </nav>
 
       {/* User Info & Logout */}
-      <div className="pt-4 mt-auto border-t border-stone-100">
-        <div className="flex items-center gap-2 px-2 py-3 mb-2 bg-stone-50/50 rounded-xl border border-stone-100/50">
-          <Link
-            href="/teacher/profile"
-            onClick={onItemClick}
-            className="flex flex-1 items-center gap-3 text-left group min-w-0"
-          >
-            <Avatar className="h-10 w-10 rounded-xl shadow-sm border border-stone-200 group-hover:scale-105 transition-transform shrink-0">
-              <AvatarImage src={session?.user?.image || ""} />
-              <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-white font-bold text-sm">
-                {session?.user?.name?.[0] || 'Ö'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm text-stone-800 truncate group-hover:text-primary transition-colors">{session?.user?.name || 'Öğretmen'}</p>
-              <p className="text-xs text-stone-500">Profilini Düzenle</p>
-            </div>
-          </Link>
-          <NotificationBell align="up" side="left" />
-        </div>
+      <div className="pt-4 mt-auto border-t border-stone-100 px-2 pb-2">
+        <Link
+          href="/teacher/profile"
+          onClick={onItemClick}
+          className="flex items-center gap-3 p-3 mb-2 bg-stone-50/50 hover:bg-stone-100 transition-all rounded-xl border border-stone-100/50 text-left group"
+        >
+          <Avatar className="h-10 w-10 rounded-xl shadow-sm border border-stone-200 group-hover:scale-105 transition-transform shrink-0">
+            <AvatarImage src={session?.user?.image || ""} />
+            <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-white font-bold text-sm">
+              {session?.user?.name?.[0] || 'Ö'}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm text-stone-800 truncate group-hover:text-primary transition-colors">{session?.user?.name || 'Öğretmen'}</p>
+            <p className="text-xs text-stone-500">Profil Ayarları</p>
+          </div>
+        </Link>
         <button
           onClick={() => signOut({ callbackUrl: '/login' })}
           className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl transition-all border border-transparent hover:border-red-100"
@@ -176,10 +173,20 @@ export default function TeacherLayout({
           <TeacherSidebarContent />
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-auto p-4 md:p-8 relative scroll-smooth focus:scroll-auto">
-          {children}
-        </main>
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col h-screen overflow-hidden">
+          {/* Desktop Top Bar */}
+          <header className="hidden md:flex items-center justify-end px-8 py-4 bg-white/50 backdrop-blur-sm border-b border-stone-100 z-10 shrink-0">
+            <div className="flex items-center gap-4">
+              <NotificationBell align="down" />
+            </div>
+          </header>
+
+          {/* Scrollable Content */}
+          <main className="flex-1 overflow-auto p-4 md:p-8 relative scroll-smooth focus:scroll-auto">
+            {children}
+          </main>
+        </div>
       </div>
     </NotificationProvider>
   )
