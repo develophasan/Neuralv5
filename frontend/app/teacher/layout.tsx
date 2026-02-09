@@ -15,7 +15,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
-import { ProfileModal } from "@/components/teacher/ProfileModal"
 
 const menuItems = [
   { href: "/teacher/dashboard", label: "Ana Sayfa", icon: LayoutDashboard, color: "text-orange-500" },
@@ -32,7 +31,6 @@ function TeacherSidebarContent({ onItemClick }: { onItemClick?: () => void }) {
   const pathname = usePathname()
   const { data: session } = useSession()
   const { settings, loading } = useSchoolSettings()
-  const [isProfileOpen, setIsProfileOpen] = useState(false)
 
   return (
     <div className="flex flex-col h-full bg-white md:bg-transparent">
@@ -107,22 +105,25 @@ function TeacherSidebarContent({ onItemClick }: { onItemClick?: () => void }) {
 
       {/* User Info & Logout */}
       <div className="pt-4 mt-auto border-t border-stone-100">
-        <button
-          onClick={() => setIsProfileOpen(true)}
-          className="w-full flex items-center gap-3 px-2 py-3 mb-2 bg-stone-50/50 hover:bg-stone-100 transition-colors rounded-xl border border-stone-100/50 text-left group"
-        >
-          <Avatar className="h-10 w-10 rounded-xl shadow-sm border border-stone-200 group-hover:scale-105 transition-transform">
-            <AvatarImage src={session?.user?.image || ""} />
-            <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-white font-bold text-sm">
-              {session?.user?.name?.[0] || 'Ö'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm text-stone-800 truncate group-hover:text-primary transition-colors">{session?.user?.name || 'Öğretmen'}</p>
-            <p className="text-xs text-stone-500">Profilini Düzenle</p>
-          </div>
+        <div className="flex items-center gap-2 px-2 py-3 mb-2 bg-stone-50/50 rounded-xl border border-stone-100/50">
+          <Link
+            href="/teacher/profile"
+            onClick={onItemClick}
+            className="flex flex-1 items-center gap-3 text-left group min-w-0"
+          >
+            <Avatar className="h-10 w-10 rounded-xl shadow-sm border border-stone-200 group-hover:scale-105 transition-transform shrink-0">
+              <AvatarImage src={session?.user?.image || ""} />
+              <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-white font-bold text-sm">
+                {session?.user?.name?.[0] || 'Ö'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm text-stone-800 truncate group-hover:text-primary transition-colors">{session?.user?.name || 'Öğretmen'}</p>
+              <p className="text-xs text-stone-500">Profilini Düzenle</p>
+            </div>
+          </Link>
           <NotificationBell align="up" />
-        </button>
+        </div>
         <button
           onClick={() => signOut({ callbackUrl: '/login' })}
           className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl transition-all border border-transparent hover:border-red-100"
@@ -131,14 +132,6 @@ function TeacherSidebarContent({ onItemClick }: { onItemClick?: () => void }) {
           Çıkış Yap
         </button>
       </div>
-
-      {session?.user?.id && (
-        <ProfileModal
-          isOpen={isProfileOpen}
-          onClose={() => setIsProfileOpen(false)}
-          teacherId={session.user.id}
-        />
-      )}
     </div>
   )
 }
