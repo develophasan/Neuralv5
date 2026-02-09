@@ -1,0 +1,163 @@
+{
+  "project_name": "Harmoni OS",
+  "version": "1.0.0",
+  "description": "Neuroscience-based Kindergarten Management System with role-specific interfaces.",
+  "typography": {
+    "font_family": {
+      "headings": "Manrope, sans-serif",
+      "body": "DM Sans, sans-serif",
+      "teacher_headings": "Fredoka, sans-serif"
+    },
+    "weights": {
+      "light": 300,
+      "regular": 400,
+      "medium": 500,
+      "bold": 700,
+      "black": 900
+    },
+    "scale": {
+      "h1": "text-4xl md:text-5xl font-bold tracking-tight",
+      "h2": "text-3xl md:text-4xl font-bold tracking-tight",
+      "h3": "text-2xl md:text-3xl font-semibold",
+      "body_lg": "text-lg leading-relaxed",
+      "body_base": "text-base leading-relaxed",
+      "caption": "text-sm text-muted-foreground"
+    }
+  },
+  "colors": {
+    "palette": {
+      "brand": {
+        "50": "#F0FDFA",
+        "100": "#CCFBF1",
+        "200": "#99F6E4",
+        "300": "#5EEAD4",
+        "400": "#2DD4BF",
+        "500": "#14B8A6",
+        "600": "#0D9488",
+        "700": "#0F766E",
+        "800": "#115E59",
+        "900": "#134E4A"
+      },
+      "accent": {
+        "50": "#FFFBEB",
+        "100": "#FEF3C7",
+        "200": "#FDE68A",
+        "300": "#FCD34D",
+        "400": "#FBBF24",
+        "500": "#F59E0B",
+        "600": "#D97706",
+        "700": "#B45309",
+        "800": "#92400E",
+        "900": "#78350F"
+      },
+      "neutral": {
+        "50": "#FAFAF9",
+        "100": "#F5F5F4",
+        "200": "#E7E5E4",
+        "300": "#D6D3D1",
+        "400": "#A8A29E",
+        "500": "#78716C",
+        "600": "#57534E",
+        "700": "#44403C",
+        "800": "#292524",
+        "900": "#1C1917"
+      }
+    },
+    "semantic": {
+      "background": "bg-stone-50",
+      "foreground": "text-stone-900",
+      "primary": "bg-teal-700 text-white hover:bg-teal-800",
+      "secondary": "bg-amber-500 text-white hover:bg-amber-600",
+      "muted": "bg-stone-100 text-stone-500",
+      "border": "border-stone-200"
+    },
+    "role_specific": {
+      "teacher": {
+        "primary": "bg-teal-500",
+        "accent": "bg-amber-400",
+        "background": "bg-white",
+        "card_bg": "bg-white border-2 border-stone-100 shadow-sm"
+      },
+      "parent": {
+        "primary": "bg-teal-600",
+        "background": "bg-stone-50",
+        "card_bg": "bg-white shadow-md rounded-2xl"
+      },
+      "admin": {
+        "primary": "bg-stone-900",
+        "sidebar": "bg-stone-900 text-stone-300",
+        "background": "bg-stone-100"
+      }
+    }
+  },
+  "layout": {
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "spacing": {
+      "section": "py-12 md:py-24",
+      "component": "p-6 md:p-8",
+      "gap_sm": "gap-4",
+      "gap_md": "gap-8",
+      "gap_lg": "gap-12"
+    },
+    "radius": {
+      "default": "rounded-xl",
+      "teacher": "rounded-3xl",
+      "parent": "rounded-2xl",
+      "admin": "rounded-lg"
+    }
+  },
+  "components": {
+    "buttons": {
+      "base": "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
+      "variants": {
+        "default": "bg-teal-700 text-white hover:bg-teal-800 h-10 py-2 px-4 rounded-lg",
+        "teacher_action": "bg-teal-500 text-white hover:bg-teal-600 h-16 text-xl px-8 rounded-full shadow-lg hover:scale-105 transition-transform",
+        "parent_action": "bg-teal-600 text-white hover:bg-teal-700 h-12 px-6 rounded-xl shadow-md",
+        "ghost": "hover:bg-stone-100 hover:text-stone-900"
+      }
+    },
+    "cards": {
+      "base": "bg-white rounded-xl border border-stone-200 shadow-sm",
+      "teacher": "bg-white rounded-3xl border-2 border-stone-100 shadow-md hover:shadow-lg transition-shadow p-6",
+      "parent": "bg-white rounded-2xl shadow-sm border-none p-6",
+      "admin": "bg-white rounded-lg border border-stone-200 shadow-sm p-4"
+    },
+    "inputs": {
+      "base": "flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-stone-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+      "teacher": "h-14 text-lg rounded-xl border-2 border-stone-200 focus-visible:ring-teal-500"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "bg-white/70 backdrop-blur-xl border border-white/20 shadow-lg",
+    "gradients": {
+      "neuro_hero": "bg-gradient-to-br from-teal-50 via-stone-50 to-amber-50",
+      "teacher_fun": "bg-gradient-to-r from-teal-400 to-teal-500"
+    },
+    "shadows": {
+      "soft": "shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
+      "float": "shadow-[0_20px_50px_rgb(0,0,0,0.1)]"
+    }
+  },
+  "image_urls": {
+    "teacher_hero": "https://images.pexels.com/photos/8613085/pexels-photo-8613085.jpeg",
+    "neuro_abstract": "https://images.unsplash.com/photo-1650820188741-b4e000d4ede3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMjV8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMG5ldXJvc2NpZW5jZSUyMG5vZGVzJTIwY29sb3JmdWx8ZW58MHx8fHwxNzcwNDgwMDA5fDA&ixlib=rb-4.1.0&q=85",
+    "kids_playing": "https://images.unsplash.com/photo-1544772711-57da9c7368fa?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDR8MHwxfHNlYXJjaHwxfHxoYXBweSUyMGRpdmVyc2UlMjBjaGlsZHJlbiUyMHBsYXlpbmclMjBsZWFybmluZ3xlbnwwfHx8fDE3NzA0ODAwMTV8MA&ixlib=rb-4.1.0&q=85",
+    "logo_placeholder": "https://via.placeholder.com/150x50?text=Harmoni+OS"
+  },
+  "accessibility": {
+    "contrast_ratio": "Ensure 4.5:1 for normal text, 3:1 for large text.",
+    "focus_states": "Visible ring-2 ring-teal-600 ring-offset-2 on all interactive elements.",
+    "touch_targets": "Minimum 44px for mobile/tablet (Teacher/Parent views)."
+  },
+  "universal_guidelines": [
+    "All interactive elements MUST have a `data-testid` attribute.",
+    "Do not use generic gradients; use the defined 'neuro_hero' or 'teacher_fun' gradients.",
+    "Use 'Manrope' for headings in Admin/Parent, 'Fredoka' for Teacher.",
+    "Teacher interface must be touch-first: large buttons, no small links.",
+    "Parent interface must be mobile-first: stackable cards, bottom navigation on mobile.",
+    "Admin interface is density-first: use tables and grids effectively.",
+    "Use 'sonner' for toast notifications.",
+    "Do not use 'Inter' font; use the specified font stack."
+  ],
+  "instructions_to_main_agent": "You are building the frontend for Harmoni OS. Follow the 'role_specific' styles strictly. When building the Teacher Dashboard, force the use of 'Fredoka' font and large rounded buttons. For Admin, stick to 'Manrope' and dense layouts. Use the provided image URLs for placeholders. Ensure all forms use 'react-hook-form' and 'zod' validation (if applicable in the stack) or standard Shadcn forms."
+}

@@ -1,0 +1,834 @@
+// Prisma Schema for Harmoni Anaokulu
+// Neon PostgreSQL Database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL") // Neon için connection pooling (opsiyonel)
+}
+
+// ============================================
+// MODÜL 1: KULLANICI YÖNETİMİ (RBAC)
+// ============================================
+
+enum UserRole {
+  admin
+  teacher
+  parent
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String?  // bcrypt hashed password
+  fullName    String   @map("full_name")
+  role        UserRole
+  phone       String?
+  avatarUrl   String?  @map("avatar_url")
+  authUserId  String?  @map("auth_user_id") // Netlify Identity veya başka auth sistemi
+  isActive    Boolean  @default(true) @map("is_active")
+  lastLoginAt DateTime? @map("last_login_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  parentStudents   ParentStudent[]
+  classTeachers   ClassTeacher[]
+  assessments     Assessment[]
+  dailyLogs       DailyLog[]
+  moodTrackers    MoodTracker[]
+  media           Media[]
+  healthRecords   HealthRecord[]
+  psychologistNotes PsychologistNote[]
+  emotionSnapshots DailyEmotionSnapshot[]
+  quickAssessments QuickAssessment[]
+  resolvedAlerts  NeuroAlert[]
+  auditLogs       AuditLog[]
+  parentConsents  ParentConsent[]
+  sentNotifications Notification[] @relation("NotificationSender")
+  receivedNotifications Notification[] @relation("NotificationRecipient")
+
+  @@map("users")
+}
+
+model Student {
+  id             String   @id @default(uuid())
+  firstName      String   @map("first_name")
+  lastName       String   @map("last_name")
+  dateOfBirth    DateTime @map("date_of_birth")
+  gender         String?  // 'male', 'female', 'other'
+  photoUrl       String?  @map("photo_url")
+  enrollmentDate DateTime @default(now()) @map("enrollment_date")
+  isActive       Boolean  @default(true) @map("is_active")
+  
+  // Kimlik Bilgileri
+  tcNo           String?  @map("tc_no")
+  birthPlace     String?  @map("birth_place")
+  nationality    String?  @default("TC")
+  
+  // Adres Bilgileri
+  address        String?
+  city           String?
+  district       String?
+  postalCode     String?  @map("postal_code")
+  
+  // Anne Bilgileri
+  motherName     String?  @map("mother_name")
+  motherPhone    String?  @map("mother_phone")
+  motherEmail    String?  @map("mother_email")
+  motherJob      String?  @map("mother_job")
+  motherTcNo     String?  @map("mother_tc_no")
+  
+  // Baba Bilgileri
+  fatherName     String?  @map("father_name")
+  fatherPhone    String?  @map("father_phone")
+  fatherEmail    String?  @map("father_email")
+  fatherJob      String?  @map("father_job")
+  fatherTcNo     String?  @map("father_tc_no")
+  
+  // Acil Durum
+  emergencyContact     String?  @map("emergency_contact")
+  emergencyPhone       String?  @map("emergency_phone")
+  emergencyRelation    String?  @map("emergency_relation")
+  
+  // Sağlık Bilgileri
+  bloodType      String?  @map("blood_type")
+  allergies      String?
+  chronicDiseases String? @map("chronic_diseases")
+  medications    String?
+  doctorName     String?  @map("doctor_name")
+  doctorPhone    String?  @map("doctor_phone")
+  
+  // Kayıt Durumu
+  isFullRegistration Boolean @default(false) @map("is_full_registration")
+  registrationNotes  String? @map("registration_notes")
+  
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  parentStudents        ParentStudent[]
+  classStudents        ClassStudent[]
+  assessments          Assessment[]
+  developmentReports   DevelopmentReport[]
+  activityRecommendations ActivityRecommendation[]
+  dailyLogs            DailyLog[]
+  moodTrackers         MoodTracker[]
+  media                Media[]
+  healthRecords        HealthRecord[]
+  psychologistNotes    PsychologistNote[]
+  neuroProfile         ChildNeuroProfile?
+  neuroZProfiles       ChildNeuroZProfile[]
+  domainStats          ChildDomainStats[]
+  neuroRiskProfile     NeuroRiskProfile?
+  neuroAlerts          NeuroAlert[]
+  emotionSnapshots     DailyEmotionSnapshot[]
+  aiSummaries          AIChildSummary[]
+  quickAssessments     QuickAssessment[]
+  developmentTrends    ChildDevelopmentTrend[]
+  parentConsents       ParentConsent[]
+  notifications        Notification[]
+
+  @@map("students")
+}
+
+model ParentStudent {
+  id           String   @id @default(uuid())
+  parentId     String   @map("parent_id")
+  studentId    String   @map("student_id")
+  relationship String   @default("parent")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  parent  User    @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([parentId, studentId])
+  @@map("parent_students")
+}
+
+model Class {
+  id               String   @id @default(uuid())
+  name             String
+  ageGroup         String   @map("age_group") // "2-3", "3-4", etc.
+  capacity         Int      @default(20)
+  currentEnrollment Int     @default(0) @map("current_enrollment")
+  academicYear     String   @map("academic_year")
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  classTeachers ClassTeacher[]
+  classStudents ClassStudent[]
+  dailyLogs     DailyLog[]
+  media         Media[]
+
+  @@map("classes")
+}
+
+model ClassTeacher {
+  id            String   @id @default(uuid())
+  classId       String   @map("class_id")
+  teacherId     String   @map("teacher_id")
+  isLeadTeacher Boolean  @default(false) @map("is_lead_teacher")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  class   Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher User  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, teacherId])
+  @@map("class_teachers")
+}
+
+model ClassStudent {
+  id             String   @id @default(uuid())
+  classId        String   @map("class_id")
+  studentId      String   @map("student_id")
+  enrollmentDate DateTime @default(now()) @map("enrollment_date")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, studentId])
+  @@map("class_students")
+}
+
+// ============================================
+// MODÜL 2: NÖROGELİŞİMSEL TAKİP SİSTEMİ
+// ============================================
+
+model DevelopmentDomain {
+  id          String   @id @default(uuid())
+  code        String   @unique // 'executive_functions', 'language', etc.
+  nameTr      String   @map("name_tr")
+  nameEn      String   @map("name_en")
+  description String?
+  iconName    String?  @map("icon_name")
+  color       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  assessmentScores        AssessmentScore[]
+  activities              Activity[]
+  activityRecommendations ActivityRecommendation[]
+
+  @@map("development_domains")
+}
+
+model Assessment {
+  id            String   @id @default(uuid())
+  studentId     String   @map("student_id")
+  assessedBy    String   @map("assessed_by")
+  assessmentDate DateTime @map("assessment_date") @default(now())
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  student  Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  assessor User             @relation(fields: [assessedBy], references: [id], onDelete: SetNull)
+  scores   AssessmentScore[]
+
+  @@map("assessments")
+}
+
+model AssessmentScore {
+  id               String   @id @default(uuid())
+  assessmentId     String   @map("assessment_id")
+  domainId         String   @map("domain_id")
+  score            Int?     // 1-5
+  percentage       Int?     // 0-100
+  observationNotes String?  @map("observation_notes")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  assessment Assessment        @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  domain     DevelopmentDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@unique([assessmentId, domainId])
+  @@map("assessment_scores")
+}
+
+enum ReportType {
+  weekly
+  monthly
+  quarterly
+}
+
+model DevelopmentReport {
+  id           String     @id @default(uuid())
+  studentId    String     @map("student_id")
+  reportType   ReportType @map("report_type")
+  periodStart  DateTime   @map("period_start")
+  periodEnd    DateTime   @map("period_end")
+  generatedAt  DateTime   @default(now()) @map("generated_at")
+  summaryText  String?    @map("summary_text")
+  domainAverages String?   @map("domain_averages") // JSON string
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("development_reports")
+}
+
+// ============================================
+// MODÜL 3: EĞİTİM VE OYUN HAVUZU
+// ============================================
+
+model Activity {
+  id              String   @id @default(uuid())
+  title           String
+  description     String?
+  domainId        String   @map("domain_id")
+  ageMin          Int      @default(2) @map("age_min")
+  ageMax          Int      @default(6) @map("age_max")
+  durationMinutes Int?     @map("duration_minutes")
+  materialsNeeded String?  @map("materials_needed") // JSON string
+  instructions    String?
+  difficultyLevel Int      @default(1) @map("difficulty_level") // 1-5
+  imageUrl        String?  @map("image_url")
+  videoUrl        String?  @map("video_url")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  domain           DevelopmentDomain      @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  recommendations  ActivityRecommendation[]
+
+  @@map("activities")
+}
+
+enum RecommendedTo {
+  teacher
+  parent
+  both
+}
+
+enum RecommendationStatus {
+  pending
+  accepted
+  completed
+  dismissed
+}
+
+model ActivityRecommendation {
+  id             String              @id @default(uuid())
+  studentId      String              @map("student_id")
+  activityId     String              @map("activity_id")
+  domainId       String              @map("domain_id")
+  reason         String?
+  thresholdScore Int?                @map("threshold_score")
+  currentScore   Int?                @map("current_score")
+  recommendedTo  RecommendedTo       @map("recommended_to")
+  status         RecommendationStatus @default(pending)
+  recommendedAt  DateTime            @default(now()) @map("recommended_at")
+  completedAt    DateTime?           @map("completed_at")
+  createdAt      DateTime            @default(now()) @map("created_at")
+
+  student  Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  activity Activity          @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  domain   DevelopmentDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@map("activity_recommendations")
+}
+
+// ============================================
+// MODÜL 4: GÜNLÜK AKIŞ VE İLETİŞİM
+// ============================================
+
+model DailyLog {
+  id                String    @id @default(uuid())
+  studentId         String    @map("student_id")
+  classId           String    @map("class_id")
+  logDate           DateTime  @default(now()) @map("log_date")
+  loggedBy          String    @map("logged_by")
+  breakfastEaten    Boolean?  @map("breakfast_eaten")
+  lunchEaten        Boolean?  @map("lunch_eaten")
+  snackEaten        Boolean?  @map("snack_eaten")
+  mealNotes         String?   @map("meal_notes")
+  napStartTime      String?   @map("nap_start_time") // TIME as String
+  napEndTime        String?   @map("nap_end_time")
+  napDurationMinutes Int?     @map("nap_duration_minutes")
+  sleepQuality      String?   @map("sleep_quality") // 'good', 'restless', 'difficult'
+  toiletVisits      Int       @default(0) @map("toilet_visits")
+  accidents         Int       @default(0)
+  toiletNotes       String?   @map("toilet_notes")
+  generalNotes      String?   @map("general_notes")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  student  Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  class    Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  logger   User    @relation(fields: [loggedBy], references: [id], onDelete: SetNull)
+
+  @@unique([studentId, logDate])
+  @@map("daily_logs")
+}
+
+enum TimeOfDay {
+  morning
+  afternoon
+  evening
+}
+
+enum Mood {
+  very_happy
+  happy
+  neutral
+  sad
+  very_sad
+  anxious
+  calm
+  energetic
+}
+
+model MoodTracker {
+  id          String     @id @default(uuid())
+  studentId   String     @map("student_id")
+  logDate     DateTime   @default(now()) @map("log_date")
+  timeOfDay   TimeOfDay  @map("time_of_day")
+  mood        Mood
+  stressLevel Int        @map("stress_level") // 1-5
+  notes       String?
+  loggedBy    String     @map("logged_by")
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  logger  User    @relation(fields: [loggedBy], references: [id], onDelete: SetNull)
+
+  @@unique([studentId, logDate, timeOfDay])
+  @@map("mood_tracker")
+}
+
+enum MediaType {
+  photo
+  video
+}
+
+model Media {
+  id                String    @id @default(uuid())
+  studentId         String?   @map("student_id")
+  classId           String?   @map("class_id")
+  mediaType         MediaType @map("media_type")
+  url               String
+  thumbnailUrl      String?   @map("thumbnail_url")
+  caption           String?
+  uploadedBy        String    @map("uploaded_by")
+  uploadedAt        DateTime  @default(now()) @map("uploaded_at")
+  isVisibleToParents Boolean  @default(true) @map("is_visible_to_parents")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  student    Student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  class      Class?   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  uploader   User     @relation(fields: [uploadedBy], references: [id], onDelete: SetNull)
+
+  @@map("media")
+}
+
+// ============================================
+// MODÜL 5: SAĞLIK VE PSİKOLOJİ
+// ============================================
+
+model HealthRecord {
+  id          String    @id @default(uuid())
+  studentId   String    @map("student_id")
+  recordDate  DateTime  @default(now()) @map("record_date")
+  heightCm    Float?    @map("height_cm")
+  weightKg    Float?    @map("weight_kg")
+  bmi         Float?
+  notes       String?
+  recordedBy  String?   @map("recorded_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  recorder User?  @relation(fields: [recordedBy], references: [id], onDelete: SetNull)
+
+  @@map("health_records")
+}
+
+model PsychologistNote {
+  id             String   @id @default(uuid())
+  studentId      String   @map("student_id")
+  noteDate       DateTime @default(now()) @map("note_date")
+  notes          String
+  concerns       String?
+  recommendations String?
+  createdBy      String   @map("created_by")
+  isConfidential Boolean  @default(true) @map("is_confidential")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  student  Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  creator  User    @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@map("psychologist_notes")
+}
+
+// ============================================
+// MODÜL 6: HARMONI OS V2 - NEURO INTELLIGENCE
+// ============================================
+
+// Child Neuro DNA Profile - 10 domain scores
+model ChildNeuroProfile {
+  id              String   @id @default(uuid())
+  studentId       String   @unique @map("student_id")
+  executiveScore  Float    @default(0) @map("executive_score")
+  languageScore   Float    @default(0) @map("language_score")
+  emotionalScore  Float    @default(0) @map("emotional_score")
+  grossMotorScore Float    @default(0) @map("gross_motor_score")
+  fineMotorScore  Float    @default(0) @map("fine_motor_score")
+  logicScore      Float    @default(0) @map("logic_score")
+  creativeScore   Float    @default(0) @map("creative_score")
+  spatialScore    Float    @default(0) @map("spatial_score")
+  discoveryScore  Float    @default(0) @map("discovery_score")
+  independenceScore Float  @default(0) @map("independence_score")
+  lastCalculated  DateTime @default(now()) @map("last_calculated")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("child_neuro_profiles")
+}
+
+// Early Risk Detection Alerts
+enum AlertSeverity {
+  low
+  medium
+  high
+}
+
+// NeuroAlert V2 (deprecated - use V3 below)
+// model NeuroAlert {
+//   id          String        @id @default(uuid())
+//   studentId   String        @map("student_id")
+//   domain      String
+//   severity    AlertSeverity
+//   message     String
+//   isResolved  Boolean       @default(false) @map("is_resolved")
+//   resolvedAt  DateTime?     @map("resolved_at")
+//   resolvedBy  String?       @map("resolved_by")
+//   createdAt   DateTime      @default(now()) @map("created_at")
+//   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+//   resolver User?  @relation(fields: [resolvedBy], references: [id], onDelete: SetNull)
+//   @@map("neuro_alerts")
+// }
+
+// Daily Emotional Flow - Instagram-style parent view
+model DailyEmotionSnapshot {
+  id          String   @id @default(uuid())
+  studentId   String   @map("student_id")
+  date        DateTime @default(now())
+  mood        Int      // 1-5 scale
+  highlight   String?  // "Learned today"
+  challenge   String?  // "Challenge today"
+  note        String?  // General note
+  teacherId   String   @map("teacher_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacher User    @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+
+  @@unique([studentId, date])
+  @@map("daily_emotion_snapshots")
+}
+
+// AI Daily Child Message - V2 (deprecated, use V3 below)
+// model AIChildSummary {
+//   id                String   @id @default(uuid())
+//   studentId         String   @map("student_id")
+//   date              DateTime @default(now())
+//   progressText      String   @map("progress_text")
+//   homeRecommendation String? @map("home_recommendation")
+//   generatedAt       DateTime @default(now()) @map("generated_at")
+//   createdAt         DateTime @default(now()) @map("created_at")
+//   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+//   @@unique([studentId, date])
+//   @@map("ai_child_summaries")
+// }
+
+// One Tap Assessment - Quick domain scoring
+model QuickAssessment {
+  id          String   @id @default(uuid())
+  studentId   String   @map("student_id")
+  domain      String   // Domain code
+  score       Int      // 1-5 (🟢=5, 🟡=3, 🔴=1)
+  assessedBy  String   @map("assessed_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  assessor User   @relation(fields: [assessedBy], references: [id], onDelete: SetNull)
+
+  @@map("quick_assessments")
+}
+
+// Development Trend Engine - Weekly calculations
+model ChildDevelopmentTrend {
+  id          String   @id @default(uuid())
+  studentId   String   @map("student_id")
+  domain      String   // Domain code
+  delta       Float    // Change percentage
+  periodStart DateTime @map("period_start")
+  periodEnd   DateTime @map("period_end")
+  calculatedAt DateTime @default(now()) @map("calculated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, domain, periodStart])
+  @@map("child_development_trends")
+}
+
+// ============================================
+// MODÜL 6.5: HARMONI OS V3 - STATISTICAL INTELLIGENCE
+// ============================================
+
+// Age-based normalization table for Z-score calculation
+model NeuroNormTable {
+  id          String   @id @default(uuid())
+  ageInMonths Int      @map("age_in_months") // 24, 30, 36, 42, 48, 54, 60, 66, 72
+  domain      String   // Domain code (executive_functions, language_communication, etc.)
+  mean        Float    // Population mean for this age
+  stdDev      Float    @map("std_dev") // Standard deviation
+  sampleSize  Int      @default(1000) @map("sample_size")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([ageInMonths, domain])
+  @@index([ageInMonths])
+  @@index([domain])
+  @@map("neuro_norm_table")
+}
+
+// Z-Score Profile - Weekly normalized scores
+model ChildNeuroZProfile {
+  id          String   @id @default(uuid())
+  studentId   String   @map("student_id")
+  domain      String   // Domain code
+  rawScore    Float    @map("raw_score") // Original percentage score
+  zScore      Float    @map("z_score") // Normalized Z-score
+  percentile  Float    // Percentile rank (0-100)
+  ageInMonths Int      @map("age_in_months")
+  weekStart   DateTime @map("week_start") // Monday of the week
+  calculatedAt DateTime @default(now()) @map("calculated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, domain, weekStart])
+  @@index([studentId, weekStart])
+  @@index([domain])
+  @@map("child_neuro_z_profiles")
+}
+
+// Domain Statistics - Cohort-based mean and std for Z-score calculation
+model ChildDomainStats {
+  id          String   @id @default(uuid())
+  studentId   String   @map("student_id")
+  domain      String   // Domain code
+  mean        Float    // Cohort mean (same age band)
+  std         Float    // Cohort standard deviation
+  cohortSize  Int      @default(0) @map("cohort_size")
+  ageInMonths Int      @map("age_in_months")
+  calculatedAt DateTime @default(now()) @map("calculated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, domain])
+  @@index([studentId])
+  @@index([domain, ageInMonths])
+  @@map("child_domain_stats")
+}
+
+// Statistical Risk Profile - Calculated risk scores
+model NeuroRiskProfile {
+  id                  String   @id @default(uuid())
+  studentId           String   @unique @map("student_id")
+  riskScore           Float    @map("risk_score") // Combined risk score
+  severity            AlertSeverity
+  trendSlope          Float    @map("trend_slope") // Regression slope of last 4 weeks
+  domainImbalance     Float    @map("domain_imbalance") // Std dev across domains
+  emotionalInstability Float   @map("emotional_instability") // Variance of moods
+  weakestDomain       String?  @map("weakest_domain")
+  decliningDomain     String?  @map("declining_domain")
+  strongestDomain     String?  @map("strongest_domain")
+  calculatedAt        DateTime @default(now()) @map("calculated_at")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("neuro_risk_profiles")
+}
+
+// Enhanced NeuroAlert with explainability
+model NeuroAlert {
+  id          String        @id @default(uuid())
+  studentId   String        @map("student_id")
+  domain      String        // Domain code (e.g., 'executive_functions')
+  severity    AlertSeverity
+  message     String
+  explanation String?       // JSON string with explainability data
+  isResolved  Boolean       @default(false) @map("is_resolved")
+  resolvedAt  DateTime?     @map("resolved_at")
+  resolvedBy  String?       @map("resolved_by")
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  resolver User?  @relation(fields: [resolvedBy], references: [id], onDelete: SetNull)
+
+  @@map("neuro_alerts")
+}
+
+// Enhanced AI Summary with V3 structure
+model AIChildSummary {
+  id                String   @id @default(uuid())
+  studentId         String   @map("student_id")
+  date              DateTime @default(now())
+  summary           String   @default("Gelişim takibi devam ediyor.") // Development summary (2 sentences)
+  riskExplanation   String?  @map("risk_explanation") // Simple Turkish risk explanation
+  homeActivity      String?  @map("home_activity") // Specific to weakest domain
+  positiveNote      String?  @map("positive_note") // Positive reinforcement
+  // Legacy V2 fields (deprecated, kept for migration compatibility)
+  progressText      String?  @map("progress_text")
+  homeRecommendation String? @map("home_recommendation")
+  generatedAt       DateTime @default(now()) @map("generated_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, date])
+  @@map("ai_child_summaries")
+}
+
+// ============================================
+// MODÜL 7: KVKK + AUDIT SYSTEM
+// ============================================
+
+// Audit Log - Track all user actions
+enum AuditAction {
+  create
+  update
+  delete
+  view
+  export
+  login
+  logout
+}
+
+model AuditLog {
+  id        String      @id @default(uuid())
+  userId    String?     @map("user_id")
+  action    AuditAction
+  entity    String      // Entity type (e.g., 'Student', 'Assessment')
+  entityId  String?     @map("entity_id")
+  details   String?     // JSON string with additional details
+  ipAddress String?     @map("ip_address")
+  userAgent String?     @map("user_agent")
+  timestamp DateTime    @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([timestamp])
+  @@index([entity, entityId])
+  @@map("audit_logs")
+}
+
+// Parent Consent - KVKK compliance
+model ParentConsent {
+  id            String   @id @default(uuid())
+  parentId      String   @map("parent_id")
+  studentId     String   @map("student_id")
+  media         Boolean  @default(false) // Photo/video consent
+  aiProcessing  Boolean  @default(false) @map("ai_processing") // AI processing consent
+  reports       Boolean  @default(false) // Report sharing consent
+  consentedAt   DateTime @default(now()) @map("consented_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  parent  User    @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([parentId, studentId])
+  @@map("parent_consents")
+}
+
+// ============================================
+// MODÜL 7: BİLDİRİMLER SİSTEMİ
+// ============================================
+
+enum NotificationType {
+  info
+  warning
+  success
+  alert
+  ai_summary
+  assessment
+  activity
+  system
+}
+
+enum NotificationSender {
+  admin
+  teacher
+  ai
+  system
+}
+
+model Notification {
+  id            String            @id @default(uuid())
+  recipientId   String            @map("recipient_id") // Parent user ID
+  studentId     String?           @map("student_id") // Optional: if related to specific student
+  senderType    NotificationSender @map("sender_type")
+  senderId      String?           @map("sender_id") // Admin/Teacher user ID (null if AI/system)
+  type          NotificationType
+  title         String
+  message       String
+  isRead        Boolean           @default(false) @map("is_read")
+  readAt        DateTime?         @map("read_at")
+  actionUrl     String?           @map("action_url") // Optional link
+  metadata      String?           // JSON string for additional data
+  createdAt     DateTime          @default(now()) @map("created_at")
+  expiresAt     DateTime?         @map("expires_at") // Optional expiration
+
+  recipient User     @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  student   Student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  sender    User?    @relation("NotificationSender", fields: [senderId], references: [id], onDelete: SetNull)
+
+  @@index([recipientId, isRead])
+  @@index([studentId])
+  @@map("notifications")
+}
+
+// ============================================
+// MODÜL 8: OKUL AYARLARI VE MARKALASMA
+// ============================================
+
+model SchoolSettings {
+  id              String   @id @default("singleton")
+  name            String   @default("Harmoni OS")
+  logoUrl         String?  @map("logo_url")
+  primaryColor    String   @default("#3b82f6") @map("primary_color")
+  secondaryColor  String   @default("#64748b") @map("secondary_color")
+  sidebarBg       String   @default("#0c1221") @map("sidebar_bg")
+  sidebarBorder   String   @default("#1e293b") @map("sidebar_border")
+  pageBg          String   @default("#f8fafc") @map("page_bg")
+  textPrimary     String   @default("#1e293b") @map("text_primary")
+  textSidebar     String   @default("#94a3b8") @map("text_sidebar")
+  themePalette    String   @default("default") @map("theme_palette")
+  address         String?
+  phone           String?
+  email           String?
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("school_settings")
+}
+

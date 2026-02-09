@@ -1,0 +1,35 @@
+[build]
+  command = "cd apps/web && npm run db:generate && npm run build"
+  publish = "apps/web/.next"
+
+[build.environment]
+  NODE_VERSION = "18"
+  PRISMA_GENERATE_DATAPROXY = "true"
+
+# Netlify Functions (API routes için)
+[functions]
+  directory = "apps/web/netlify/functions"
+  node_bundler = "esbuild"
+  included_files = ["apps/web/node_modules/.prisma/**"]
+
+# Redirects - API routes için
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+# Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Environment variables (Netlify Dashboard'dan ayarlanacak)
+# DATABASE_URL - Neon PostgreSQL connection string (pooled)
+# DIRECT_URL - Neon direct connection string (opsiyonel, migrations için)
+# NODE_ENV=production
+
