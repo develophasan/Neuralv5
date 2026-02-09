@@ -122,7 +122,7 @@ function TeacherSidebarContent({ onItemClick }: { onItemClick?: () => void }) {
               <p className="text-xs text-stone-500">Profilini Düzenle</p>
             </div>
           </Link>
-          <NotificationBell align="up" />
+          <NotificationBell align="up" side="left" />
         </div>
         <button
           onClick={() => signOut({ callbackUrl: '/login' })}
