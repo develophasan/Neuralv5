@@ -164,21 +164,21 @@ export default function TeacherDailyLogsPage() {
   }
 
   return (
-    <div className="min-h-screen teacher-layout p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-10">
-        {/* Header */}
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6 md:space-y-10">
+        {/* Header - More Responsive */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <h1 className="text-4xl md:text-5xl font-heading font-extrabold text-slate-900 mb-3 flex items-center gap-4">
-              <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-xl flex items-center justify-center">
-                <Calendar className="h-8 w-8 text-white" />
+            <h1 className="text-2xl md:text-5xl font-bold text-slate-900 mb-2 flex items-center gap-3">
+              <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg flex items-center justify-center shrink-0">
+                <Calendar className="h-6 w-6 md:h-8 md:w-8 text-white" />
               </div>
-              Günlük <span className="text-transparent bg-clip-text bg-gradient-to-r from-sapphire-600 to-indigo-600">Takip</span>
+              <span>Günlük <span className="text-primary">Takip</span></span>
             </h1>
-            <p className="text-slate-500 text-xl font-medium">
+            <p className="text-slate-500 text-base md:text-xl font-medium">
               Öğrencilerin günlük yaşamını ve duygusal gelişimini koordine edin.
             </p>
           </motion.div>
@@ -186,19 +186,19 @@ export default function TeacherDailyLogsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex p-2 bg-white/50 backdrop-blur-md rounded-2xl border border-white/50 shadow-sm"
+            className="flex p-1 bg-stone-100/50 backdrop-blur-md rounded-2xl border border-stone-200 shadow-sm w-full md:w-auto"
           >
             {[
               { id: 'logs', label: 'Arşiv', icon: Calendar },
-              { id: 'bulk-log', label: 'Log Girişi', icon: Plus },
+              { id: 'bulk-log', label: 'Giriş', icon: Plus },
               { id: 'bulk-mood', label: 'Duygu', icon: Smile },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === tab.id
-                  ? 'bg-white shadow-lg text-sapphire-600'
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-white/30'
+                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${activeTab === tab.id
+                  ? 'bg-white shadow-sm text-primary'
+                  : 'text-stone-500 hover:text-stone-700'
                   }`}
               >
                 <tab.icon className="h-4 w-4" />
@@ -214,22 +214,22 @@ export default function TeacherDailyLogsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="teacher-card-premium group">
-            <div className="flex flex-col md:flex-row md:items-center gap-6">
-              <div className="h-16 w-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center group-hover:rotate-6 transition-transform">
-                <BookOpen className="h-8 w-8 text-indigo-600" />
+          <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+                <BookOpen className="h-6 w-6 text-indigo-600" />
               </div>
-              <div className="flex-1">
-                <Label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">YÖNETİLECEK SINIFI SEÇİN</Label>
+              <div className="flex-1 w-full">
+                <Label className="block text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">SINIF SEÇİMİ</Label>
                 <select
                   value={selectedClassId}
                   onChange={(e) => setSelectedClassId(e.target.value)}
-                  className="w-full max-w-lg h-14 rounded-2xl border-2 border-slate-100 bg-slate-50/50 px-4 text-lg font-bold text-slate-800 focus:border-sapphire-500 focus:ring-4 focus:ring-sapphire-500/10 transition-all outline-none"
+                  className="w-full h-12 rounded-xl border border-stone-200 bg-stone-50/50 px-3 text-base font-bold text-stone-800 focus:border-primary transition-all outline-none"
                 >
                   <option value="">Sınıf seçiniz...</option>
                   {classes.map((cls: any) => (
                     <option key={cls.id} value={cls.id}>
-                      {cls.name} • {cls.ageGroup} yaş
+                      {cls.name}
                     </option>
                   ))}
                 </select>
@@ -239,7 +239,7 @@ export default function TeacherDailyLogsPage() {
         </motion.div>
 
         {/* Content Area */}
-        <div className="relative pt-6">
+        <div className="relative">
           <AnimatePresence mode="wait">
             {!selectedClassId ? (
               <motion.div
@@ -247,11 +247,11 @@ export default function TeacherDailyLogsPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="text-center py-24 glass-card-premium rounded-[3rem]"
+                className="text-center py-16 bg-white border border-stone-100 rounded-[2rem]"
               >
-                <Users className="h-20 w-20 mx-auto mb-6 text-slate-300 opacity-50" />
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">Henüz Sınıf Seçilmedi</h3>
-                <p className="text-slate-500 font-medium">Lütfen yukarıdaki menüden işlem yapmak istediğiniz sınıfı seçin.</p>
+                <Users className="h-16 w-16 mx-auto mb-4 text-stone-200" />
+                <h3 className="text-xl font-bold text-stone-900 mb-2">Henüz Sınıf Seçilmedi</h3>
+                <p className="text-stone-500 text-sm px-8">Lütfen yukarıdaki menüden işlem yapmak istediğiniz sınıfı seçin.</p>
               </motion.div>
             ) : (
               <motion.div
@@ -263,44 +263,42 @@ export default function TeacherDailyLogsPage() {
               >
                 {/* Kayıtlar Arşivi */}
                 {activeTab === 'logs' && (
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {logs.length === 0 ? (
-                      <div className="text-center py-20 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-                        <Calendar className="h-12 w-12 mx-auto mb-4 text-slate-300" />
-                        <p className="text-slate-500 font-bold">Bugün için henüz log kaydı girilmemiş.</p>
-                        <Button onClick={() => setActiveTab('bulk-log')} className="mt-6 bg-sapphire-600 text-white rounded-xl">Hemen Giriş Yap</Button>
+                      <div className="text-center py-16 bg-stone-50/50 rounded-2xl border-2 border-dashed border-stone-200">
+                        <Calendar className="h-10 w-10 mx-auto mb-3 text-stone-300" />
+                        <p className="text-stone-500 font-bold p-2 text-sm">Bugün için henüz log kaydı girilmemiş.</p>
+                        <Button onClick={() => setActiveTab('bulk-log')} className="mt-4 bg-primary text-white rounded-xl h-10 px-6 text-sm">Hemen Giriş Yap</Button>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {logs.map((log: any, idx) => (
                           <motion.div key={log.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}>
-                            <div className="teacher-card-premium border-l-8 border-l-sapphire-500">
-                              <div className="flex items-center justify-between mb-6">
+                            <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm border-l-4 border-l-primary">
+                              <div className="flex items-center justify-between mb-4">
                                 <div>
-                                  <h3 className="text-xl font-black text-slate-900">{log.student?.firstName} {log.student?.lastName}</h3>
-                                  <p className="text-sm font-bold text-slate-400 capitalize">
-                                    {new Date(log.logDate).toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                  <h3 className="text-lg font-bold text-stone-900">{log.student?.firstName} {log.student?.lastName}</h3>
+                                  <p className="text-[10px] font-bold text-stone-400 capitalize">
+                                    {new Date(log.logDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'short' })}
                                   </p>
                                 </div>
-                                <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center">
-                                  <CheckCircle2 className="h-6 w-6 text-emerald-500" />
-                                </div>
+                                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
                               </div>
-                              <div className="grid grid-cols-3 gap-4">
-                                <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-100 flex flex-col items-center">
-                                  <Utensils className="h-6 w-6 text-amber-500 mb-2" />
-                                  <span className="text-[10px] font-black text-amber-700 uppercase">BESLENME</span>
-                                  <span className="text-xs font-bold mt-1">Yeterli</span>
+                              <div className="grid grid-cols-3 gap-2">
+                                <div className="p-2 rounded-xl bg-amber-50/50 border border-amber-100 flex flex-col items-center justify-center">
+                                  <Utensils className="h-4 w-4 text-amber-500 mb-1" />
+                                  <span className="text-[9px] font-bold text-amber-700 uppercase">YEMEK</span>
+                                  <span className="text-[10px] font-bold truncate w-full text-center">Yeterli</span>
                                 </div>
-                                <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 flex flex-col items-center">
-                                  <Moon className="h-6 w-6 text-indigo-500 mb-2" />
-                                  <span className="text-[10px] font-black text-indigo-700 uppercase">UYKU</span>
-                                  <span className="text-xs font-bold mt-1">{log.napDuration ? `${log.napDuration}'` : '-'}</span>
+                                <div className="p-2 rounded-xl bg-indigo-50/50 border border-indigo-100 flex flex-col items-center justify-center">
+                                  <Moon className="h-4 w-4 text-indigo-500 mb-1" />
+                                  <span className="text-[9px] font-bold text-indigo-700 uppercase">UYKU</span>
+                                  <span className="text-[10px] font-bold">{log.napDuration ? `${log.napDuration}'` : '-'}</span>
                                 </div>
-                                <div className="p-4 rounded-2xl bg-blue-50/50 border border-blue-100 flex flex-col items-center">
-                                  <Droplets className="h-6 w-6 text-blue-500 mb-2" />
-                                  <span className="text-[10px] font-black text-blue-700 uppercase">TUVALET</span>
-                                  <span className="text-xs font-bold mt-1 truncate w-full text-center">{log.toiletNotes || 'Normal'}</span>
+                                <div className="p-2 rounded-xl bg-blue-50/50 border border-blue-100 flex flex-col items-center justify-center">
+                                  <Droplets className="h-4 w-4 text-blue-500 mb-1" />
+                                  <span className="text-[9px] font-bold text-blue-700 uppercase">TUVALET</span>
+                                  <span className="text-[10px] font-bold truncate w-full text-center">{log.toiletNotes || 'Normal'}</span>
                                 </div>
                               </div>
                             </div>
@@ -313,69 +311,69 @@ export default function TeacherDailyLogsPage() {
 
                 {/* Toplu Log Girişi */}
                 {activeTab === 'bulk-log' && (
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between bg-gradient-to-r from-sapphire-600 to-indigo-700 p-8 rounded-[2rem] text-white shadow-xl shadow-indigo-100">
+                  <div className="space-y-4">
+                    <div className="flex flex-col gap-4 bg-gradient-to-br from-primary to-indigo-700 p-6 md:p-8 rounded-3xl text-white shadow-xl">
                       <div>
-                        <h2 className="text-2xl font-black">Toplu Log Girişi</h2>
-                        <p className="text-indigo-100 font-medium">Tüm sınıf verilerini tek seferde kaydedin.</p>
+                        <h2 className="text-xl md:text-2xl font-bold">Toplu Giriş</h2>
+                        <p className="text-indigo-100/80 text-sm">Tüm sınıf verilerini hızlıca kaydedin.</p>
                       </div>
                       <Button
                         onClick={handleSaveBulkLogs}
                         disabled={saving || Object.keys(bulkLogData).length === 0}
-                        className="bg-white text-sapphire-600 hover:bg-slate-50 font-black h-14 px-8 rounded-2xl shadow-xl transition-all"
+                        className="bg-white text-primary hover:bg-stone-50 font-bold h-12 w-full md:w-auto px-8 rounded-xl shadow-lg transition-all"
                       >
                         {saving ? "Kaydediliyor..." : "Tümünü Kaydet"}
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-3">
                       {students.map((student: any, idx) => (
                         <motion.div
                           key={student.id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: idx * 0.03 }}
-                          className={`teacher-card-premium transition-all ${bulkLogData[student.id] ? 'border-sapphire-200 bg-sapphire-50/10' : ''}`}
+                          className={`bg-white p-4 md:p-6 rounded-2xl border border-stone-100 shadow-sm transition-all ${bulkLogData[student.id] ? 'border-primary/30 bg-primary/5' : ''}`}
                         >
-                          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-center">
-                            <div className="flex items-center gap-4">
-                              <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center font-black text-slate-500">
+                          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="h-9 w-9 rounded-lg bg-stone-50 flex items-center justify-center text-sm font-bold text-stone-400 shrink-0">
                                 {idx + 1}
                               </div>
-                              <h3 className="text-lg font-extrabold text-slate-800">{student.firstName} {student.lastName}</h3>
+                              <h3 className="text-base font-bold text-stone-800">{student.firstName} {student.lastName}</h3>
                             </div>
 
-                            <div className="grid grid-cols-3 col-span-3 gap-6">
-                              <div className="space-y-2">
-                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">YEMEK</Label>
+                            <div className="grid grid-cols-2 md:grid-cols-3 flex-1 gap-3 md:gap-4">
+                              <div className="space-y-1">
+                                <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ml-1">YEMEK</Label>
                                 <select
                                   value={bulkLogData[student.id]?.mealLunch || ''}
                                   onChange={(e) => handleBulkLogChange(student.id, 'mealLunch', e.target.value)}
-                                  className="w-full h-12 bg-white rounded-xl border border-slate-100 text-sm font-bold focus:ring-4 focus:ring-sapphire-500/10 outline-none px-3"
+                                  className="w-full h-10 bg-white rounded-lg border border-stone-200 text-xs font-bold px-2 outline-none focus:border-primary"
                                 >
                                   <option value="">Seçiniz</option>
                                   {mealOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                                 </select>
                               </div>
 
-                              <div className="space-y-2">
-                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">UYKU (DK)</Label>
+                              <div className="space-y-1">
+                                <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ml-1">UYKU (DK)</Label>
                                 <Input
                                   type="number"
                                   placeholder="90"
                                   value={bulkLogData[student.id]?.napDuration || ''}
                                   onChange={(e) => handleBulkLogChange(student.id, 'napDuration', parseInt(e.target.value) || null)}
-                                  className="h-12 bg-white rounded-xl border border-slate-100 text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                                  className="h-10 bg-white rounded-lg border-stone-200 text-xs font-bold"
                                 />
                               </div>
 
-                              <div className="space-y-2">
-                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">TUVALET</Label>
+                              <div className="space-y-1 col-span-2 md:col-span-1">
+                                <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ml-1">TUVALET</Label>
                                 <Input
                                   placeholder="Not..."
                                   value={bulkLogData[student.id]?.toiletNotes || ''}
                                   onChange={(e) => handleBulkLogChange(student.id, 'toiletNotes', e.target.value)}
-                                  className="h-12 bg-white rounded-xl border border-slate-100 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 transition-all"
+                                  className="h-10 bg-white rounded-lg border-stone-200 text-xs font-bold"
                                 />
                               </div>
                             </div>
@@ -388,53 +386,51 @@ export default function TeacherDailyLogsPage() {
 
                 {/* Toplu Duygu Takibi */}
                 {activeTab === 'bulk-mood' && (
-                  <div className="space-y-8">
-                    <div className="flex items-center justify-between bg-gradient-to-r from-pink-500 to-rose-600 p-8 rounded-[2rem] text-white shadow-xl shadow-rose-100">
+                  <div className="space-y-6">
+                    <div className="flex flex-col gap-4 bg-gradient-to-br from-pink-500 to-rose-600 p-6 md:p-8 rounded-3xl text-white shadow-xl">
                       <div>
-                        <h2 className="text-2xl font-black">Sınıfın Enerjisi</h2>
-                        <p className="text-rose-100 font-medium">Bireysel ve kolektif duygu durumu takibi.</p>
+                        <h2 className="text-xl md:text-2xl font-bold">Duygu Durumu</h2>
+                        <p className="text-rose-100/80 text-sm">Sınıfın genel havasını kaydedin.</p>
                       </div>
                       <Button
                         onClick={handleSaveBulkMood}
                         disabled={saving || Object.keys(bulkMoodData).length === 0}
-                        className="bg-white text-rose-600 hover:bg-slate-50 font-black h-14 px-8 rounded-2xl shadow-xl transition-all"
+                        className="bg-white text-rose-600 hover:bg-stone-50 font-bold h-12 w-full md:w-auto px-8 rounded-xl shadow-lg transition-all"
                       >
                         {saving ? "Kaydediliyor..." : "Kaydet ve Bitir"}
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {students.map((student: any, idx) => (
                         <motion.div
                           key={student.id}
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: idx * 0.05 }}
-                          className="teacher-card-premium group"
+                          className="bg-white p-5 rounded-3xl border border-stone-100 shadow-sm"
                         >
-                          <h3 className="text-lg font-black text-slate-800 mb-6">{student.firstName} {student.lastName}</h3>
-                          <div className="flex justify-between gap-3 mb-6">
+                          <h3 className="text-base font-bold text-stone-800 mb-4">{student.firstName} {student.lastName}</h3>
+                          <div className="grid grid-cols-5 gap-2 mb-4">
                             {moodOptions.map((mood) => (
-                              <motion.button
+                              <button
                                 key={mood.value}
-                                whileHover={{ y: -4 }}
-                                whileTap={{ scale: 0.95 }}
                                 onClick={() => setBulkMoodData(prev => ({ ...prev, [student.id]: mood.value }))}
-                                className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-300 ${bulkMoodData[student.id] === mood.value
-                                  ? `${mood.color} text-white border-transparent shadow-xl scale-110 z-10`
-                                  : `bg-slate-50 border-slate-100 ${mood.textColor} hover:border-slate-300`
+                                className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${bulkMoodData[student.id] === mood.value
+                                  ? `${mood.color} text-white shadow-lg scale-105`
+                                  : `bg-stone-50 text-stone-400 grayscale`
                                   }`}
                               >
-                                <mood.icon className="h-8 w-8" />
-                                <span className="text-[10px] font-black uppercase">{mood.label}</span>
-                              </motion.button>
+                                <mood.icon className="h-5 w-5 md:h-6 md:w-6" />
+                                <span className="text-[8px] font-bold uppercase truncate w-full text-center">{mood.label}</span>
+                              </button>
                             ))}
                           </div>
                           <Input
-                            placeholder="Özel bir durum var mı?"
+                            placeholder="Not (isteğe bağlı)..."
                             value={bulkMoodNotes[student.id] || ''}
                             onChange={(e) => setBulkMoodNotes(prev => ({ ...prev, [student.id]: e.target.value }))}
-                            className="h-12 bg-slate-50/50 rounded-xl border-slate-100 text-sm font-medium focus:bg-white transition-all"
+                            className="h-10 bg-stone-50/50 rounded-xl border-stone-200 text-xs font-medium"
                           />
                         </motion.div>
                       ))}

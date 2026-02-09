@@ -9,7 +9,7 @@ import { useTeacherId, useTeacherClasses } from "@/hooks/api/use-teacher"
 export default function TeacherClassesPage() {
   const { data: teacherId, isLoading: teacherIdLoading, error: teacherIdError } = useTeacherId()
   const { data: classes = [], isLoading: classesLoading, error: classesError, refetch } = useTeacherClasses(teacherId || null)
-  
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({
@@ -25,7 +25,7 @@ export default function TeacherClassesPage() {
   const handleCreateClass = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!teacherId) return
-    
+
     setSaving(true)
     try {
       // Create class
@@ -37,11 +37,11 @@ export default function TeacherClassesPage() {
           isActive: true,
         }),
       })
-      
+
       if (!createRes.ok) throw new Error('Failed to create class')
       const newClass = await createRes.json()
       const classId = newClass?.data?.id || newClass?.id
-      
+
       // Assign teacher to class
       await fetch('/napi/admin/class-teachers', {
         method: 'POST',
@@ -52,7 +52,7 @@ export default function TeacherClassesPage() {
           isLeadTeacher: true,
         }),
       })
-      
+
       setIsCreateModalOpen(false)
       setFormData({
         name: "",
@@ -92,18 +92,18 @@ export default function TeacherClassesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 md:mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Sınıflarım</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl md:text-3xl font-bold text-stone-900 mb-1">Sınıflarım</h1>
+            <p className="text-sm md:text-base text-stone-500">
               Yönetmek istediğiniz sınıfı seçin veya yeni sınıf oluşturun
             </p>
           </div>
-          <Button onClick={() => setIsCreateModalOpen(true)}>
+          <Button onClick={() => setIsCreateModalOpen(true)} className="w-full md:w-auto h-11 rounded-xl">
             <Plus className="mr-2 h-4 w-4" />
-            Yeni Sinif
+            Yeni Sınıf
           </Button>
         </div>
 
