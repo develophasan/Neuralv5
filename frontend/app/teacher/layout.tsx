@@ -5,16 +5,19 @@ import { usePathname } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
 import {
   LayoutDashboard, BookOpen, GraduationCap, TrendingUp,
-  FileText, Brain, Send, LogOut, Smile, CalendarDays, Menu
+  FileText, Brain, Send, LogOut, Smile, CalendarDays, Menu, Home, Plus, MoreHorizontal, Users, ChevronRight
 } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { NotificationProvider } from "@/lib/realtime/notification-provider"
 import { NotificationBell } from "@/components/notifications/notification-bell"
 import { useSchoolSettings } from "@/lib/providers/school-settings-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useState, useMemo } from "react"
+import { QuickAssessment } from "@/components/assessment/QuickAssessment"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useTeacherStudents, useTeacherId } from "@/hooks/api/use-teacher"
 
 const menuItems = [
   { href: "/teacher/dashboard", label: "Ana Sayfa", icon: LayoutDashboard, color: "text-orange-500" },
@@ -139,7 +142,23 @@ export default function TeacherLayout({
   children: React.ReactNode
 }) {
   const { data: session } = useSession()
+  const pathname = usePathname()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [isQuickOpen, setIsQuickOpen] = useState(false)
+
+  const currentPage = useMemo(() => {
+    return menuItems.find(item => pathname === item.href || (item.href !== "/teacher/dashboard" && pathname.startsWith(item.href)))
+  }, [pathname])
+
+  const mobileNavItems = [
+    { href: "/teacher/dashboard", label: "Ana Sayfa", icon: Home },
+    { href: "/teacher/students", label: "Öğrenciler", icon: Users },
+    { href: "/teacher/daily-logs", label: "Günlük", icon: CalendarDays },
+  ]
+
+  const { data: teacherId } = useTeacherId()
+  const { data: allStudents = [], isLoading: studentsLoading } = useTeacherStudents(teacherId || null)
+  const [selectedStudent, setSelectedStudent] = useState<any>(null)
 
   return (
     <NotificationProvider userId={session?.user?.id}>
@@ -151,20 +170,12 @@ export default function TeacherLayout({
             <div className="bg-gradient-to-br from-primary to-primary/80 h-8 w-8 rounded-lg flex items-center justify-center shadow-lg">
               <Brain className="h-5 w-5 text-white" />
             </div>
-            <span className="font-bold text-lg text-stone-800 tracking-tight">Harmoni OS</span>
+            <span className="font-bold text-lg text-stone-800 tracking-tight">
+              {currentPage?.label || "Harmoni OS"}
+            </span>
           </div>
           <div className="flex items-center gap-1">
             <NotificationBell align="down" />
-            <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-10 w-10 text-stone-600">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[85%] max-w-[300px] p-5 pt-8">
-                <TeacherSidebarContent onItemClick={() => setIsMobileOpen(false)} />
-              </SheetContent>
-            </Sheet>
           </div>
         </div>
 
@@ -176,17 +187,123 @@ export default function TeacherLayout({
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col h-screen overflow-hidden">
           {/* Desktop Top Bar */}
-          <header className="hidden md:flex items-center justify-end px-8 py-4 bg-white/50 backdrop-blur-sm border-b border-stone-100 z-10 shrink-0">
+          <header className="hidden md:flex items-center justify-between px-8 py-4 bg-white/50 backdrop-blur-sm border-b border-stone-100 z-10 shrink-0">
+            <div>
+              <h2 className="text-xl font-bold text-stone-800">{currentPage?.label || "Öğretmen Paneli"}</h2>
+            </div>
             <div className="flex items-center gap-4">
               <NotificationBell align="down" />
             </div>
           </header>
 
           {/* Scrollable Content */}
-          <main className="flex-1 overflow-auto p-4 md:p-8 relative scroll-smooth focus:scroll-auto">
+          <main className="flex-1 overflow-auto p-4 md:p-8 pb-24 md:pb-8 relative scroll-smooth focus:scroll-auto">
             {children}
           </main>
         </div>
+
+        {/* Mobile Bottom Navigation */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-stone-100 px-6 py-2 z-30 flex items-center justify-between shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+          {mobileNavItems.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-stone-400'}`}
+              >
+                <item.icon className="h-6 w-6" />
+                <span className="text-[10px] font-bold uppercase tracking-wider">{item.label}</span>
+              </Link>
+            )
+          })}
+
+          {/* Menu Button to open sidebar on mobile if needed */}
+          <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+            <SheetTrigger asChild>
+              <button className="flex flex-col items-center gap-1 text-stone-400">
+                <MoreHorizontal className="h-6 w-6" />
+                <span className="text-[10px] font-bold uppercase tracking-wider">Menü</span>
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[85%] max-w-[300px] p-5 pt-8">
+              <TeacherSidebarContent onItemClick={() => setIsMobileOpen(false)} />
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        {/* Floating Action Button (FAB) */}
+        <div className="md:hidden fixed bottom-20 right-4 z-40">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsQuickOpen(true)}
+            className="w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center border-4 border-white"
+          >
+            <Plus className="h-8 w-8" />
+          </motion.button>
+        </div>
+
+        {/* Quick Assessment Dialog */}
+        <Dialog open={isQuickOpen} onOpenChange={(open) => {
+          setIsQuickOpen(open)
+          if (!open) setSelectedStudent(null)
+        }}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 bg-stone-50/95 backdrop-blur-xl border-stone-200">
+            <DialogHeader className="p-6 pb-2 border-b bg-white">
+              <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                {selectedStudent ? (
+                  <>
+                    <button onClick={() => setSelectedStudent(null)} className="text-stone-400 hover:text-stone-600 transition-colors">
+                      <ChevronRight className="h-6 w-6 rotate-180" />
+                    </button>
+                    <span className="text-primary">{selectedStudent.firstName}</span> için Değerlendirme
+                  </>
+                ) : (
+                  <>
+                    <Brain className="h-6 w-6 text-primary" />
+                    Öğrenci Seçimi
+                  </>
+                )}
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              {!selectedStudent ? (
+                <div className="grid grid-cols-2 gap-4">
+                  {studentsLoading ? (
+                    <p className="col-span-2 text-center py-8 text-stone-400 italic">Öğrenciler yükleniyor...</p>
+                  ) : allStudents.length === 0 ? (
+                    <p className="col-span-2 text-center py-8 text-stone-400">Henüz öğrenci bulunmuyor.</p>
+                  ) : (
+                    allStudents.map((student: any) => (
+                      <motion.button
+                        key={student.id}
+                        onClick={() => setSelectedStudent(student)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="flex flex-col items-center p-4 rounded-xl bg-white border border-stone-200 shadow-sm hover:shadow-md hover:border-primary/30 transition-all group"
+                      >
+                        <Avatar className="h-16 w-16 mb-2">
+                          <AvatarImage src={student.photoUrl || ""} />
+                          <AvatarFallback className="bg-stone-100 text-2xl">🧒</AvatarFallback>
+                        </Avatar>
+                        <h3 className="font-bold text-stone-700">{student.firstName}</h3>
+                        <p className="text-xs text-stone-400">{student.lastName}</p>
+                      </motion.button>
+                    ))
+                  )}
+                </div>
+              ) : (
+                <QuickAssessment
+                  studentId={selectedStudent.id}
+                  onComplete={() => setIsQuickOpen(false)}
+                  onClose={() => setSelectedStudent(null)}
+                />
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </NotificationProvider>
   )
