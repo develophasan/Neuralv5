@@ -7,12 +7,13 @@ import {
   LayoutDashboard, BookOpen, GraduationCap, TrendingUp,
   FileText, Brain, Send, LogOut, Smile, CalendarDays, Menu, Home, Plus, MoreHorizontal, Users, ChevronRight
 } from "lucide-react"
+
 import { motion, AnimatePresence } from "framer-motion"
 import { NotificationProvider } from "@/lib/realtime/notification-provider"
 import { NotificationBell } from "@/components/notifications/notification-bell"
 import { useSchoolSettings } from "@/lib/providers/school-settings-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { useState, useMemo } from "react"
 import { QuickAssessment } from "@/components/assessment/QuickAssessment"
@@ -38,10 +39,10 @@ function TeacherSidebarContent({ onItemClick }: { onItemClick?: () => void }) {
   return (
     <div className="flex flex-col h-full bg-white md:bg-transparent">
       {/* Logo */}
-      <div className="mb-6 px-2">
+      <div className="mb-6 px-2 shrink-0">
         <Link href="/teacher/dashboard" className="flex items-center gap-3" onClick={onItemClick}>
           <motion.div
-            className="h-12 w-12 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all border border-stone-100"
+            className="h-12 w-12 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all border border-stone-100 shrink-0"
             style={{ backgroundColor: settings?.logoUrl ? 'transparent' : 'white' }}
             whileHover={{ scale: 1.05, rotate: 5 }}
             whileTap={{ scale: 0.95 }}
@@ -75,7 +76,7 @@ function TeacherSidebarContent({ onItemClick }: { onItemClick?: () => void }) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto scrollbar-hide py-2">
+      <nav className="flex-1 space-y-1 overflow-y-auto scrollbar-hide py-2 min-h-0">
         {menuItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
           return (
@@ -106,8 +107,8 @@ function TeacherSidebarContent({ onItemClick }: { onItemClick?: () => void }) {
         })}
       </nav>
 
-      {/* User Info & Logout */}
-      <div className="pt-4 mt-auto border-t border-stone-100 px-2 pb-2">
+      {/* User Info & Logout - shrink-0 so it never gets cut */}
+      <div className="pt-4 mt-auto border-t border-stone-100 px-2 pb-2 shrink-0">
         <Link
           href="/teacher/profile"
           onClick={onItemClick}
@@ -145,6 +146,7 @@ export default function TeacherLayout({
   const pathname = usePathname()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [isQuickOpen, setIsQuickOpen] = useState(false)
+  const [isFabOpen, setIsFabOpen] = useState(false)
 
   const currentPage = useMemo(() => {
     return menuItems.find(item => pathname === item.href || (item.href !== "/teacher/dashboard" && pathname.startsWith(item.href)))
@@ -160,25 +162,22 @@ export default function TeacherLayout({
   const { data: allStudents = [], isLoading: studentsLoading } = useTeacherStudents(teacherId || null)
   const [selectedStudent, setSelectedStudent] = useState<any>(null)
 
+  const fabActions = [
+    { label: "Hızlı Değerlendirme", icon: Brain, color: "bg-indigo-500", action: () => { setIsQuickOpen(true); setIsFabOpen(false) } },
+    { label: "Günlük Takip", icon: CalendarDays, color: "bg-amber-500", action: () => { window.location.href = "/teacher/daily-logs"; setIsFabOpen(false) } },
+    { label: "Duygu Durumu", icon: Smile, color: "bg-pink-500", action: () => { window.location.href = "/teacher/mood-tracker"; setIsFabOpen(false) } },
+  ]
+
   return (
     <NotificationProvider userId={session?.user?.id}>
       <div className="flex h-screen w-full flex-col md:flex-row bg-stone-50/30 overflow-hidden">
 
-        {/* Mobile Header - Improved with Menu Trigger */}
+        {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b sticky top-0 z-[50] shadow-sm">
           <div className="flex items-center gap-3">
-            <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9 text-stone-600">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[280px] p-0 border-r-0">
-                <div className="h-full bg-white p-6">
-                  <TeacherSidebarContent onItemClick={() => setIsMobileOpen(false)} />
-                </div>
-              </SheetContent>
-            </Sheet>
+            <button onClick={() => setIsMobileOpen(true)} className="h-9 w-9 flex items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 transition-colors">
+              <Menu className="h-6 w-6" />
+            </button>
             <div className="flex items-center gap-2">
               <div className="bg-primary h-7 w-7 rounded-lg flex items-center justify-center shadow-sm">
                 <Brain className="h-4 w-4 text-white" />
@@ -192,6 +191,15 @@ export default function TeacherLayout({
             <NotificationBell align="down" />
           </div>
         </div>
+
+        {/* Sidebar Sheet - Single controlled instance */}
+        <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+          <SheetContent side="left" className="w-[280px] p-0 border-r-0 flex flex-col">
+            <div className="flex-1 flex flex-col overflow-hidden p-5 pt-10">
+              <TeacherSidebarContent onItemClick={() => setIsMobileOpen(false)} />
+            </div>
+          </SheetContent>
+        </Sheet>
 
         {/* Desktop Sidebar */}
         <aside className="hidden md:flex w-72 flex-col border-r bg-white/50 backdrop-blur-sm p-6 h-screen sticky top-0 overflow-hidden z-10 transition-all duration-300">
@@ -216,39 +224,85 @@ export default function TeacherLayout({
           </main>
         </div>
 
-        {/* Mobile Bottom Navigation - Standardized Bar */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-stone-100 px-6 py-3 z-[60] flex items-center justify-around shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        {/* Mobile Bottom Navigation */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-stone-100 px-4 py-2 z-[60] flex items-center justify-around shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
           {mobileNavItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== "/teacher/dashboard" && pathname.startsWith(item.href))
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-stone-400'}`}
+                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors ${isActive ? 'text-primary' : 'text-stone-400'}`}
               >
-                <item.icon className="h-6 w-6" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">{item.label}</span>
+                <item.icon className="h-5 w-5" />
+                <span className="text-[10px] font-bold">{item.label}</span>
               </Link>
             )
           })}
 
           <button
             onClick={() => setIsMobileOpen(true)}
-            className="flex flex-col items-center gap-1 text-stone-400"
+            className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg text-stone-400"
           >
-            <MoreHorizontal className="h-6 w-6" />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Daha</span>
+            <MoreHorizontal className="h-5 w-5" />
+            <span className="text-[10px] font-bold">Daha</span>
           </button>
         </div>
 
-        {/* Floating Action Button (FAB) - Clearer visibility */}
-        <div className="md:hidden fixed bottom-24 right-4 z-[70]">
-          <Button
-            onClick={() => setIsQuickOpen(true)}
-            className="w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center border-2 border-white p-0"
+        {/* FAB Speed Dial */}
+        <div className="md:hidden fixed bottom-20 right-4 z-[70]">
+          {/* Backdrop when FAB is open */}
+          <AnimatePresence>
+            {isFabOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/20"
+                style={{ zIndex: 69 }}
+                onClick={() => setIsFabOpen(false)}
+              />
+            )}
+          </AnimatePresence>
+
+          {/* Speed Dial Items */}
+          <AnimatePresence>
+            {isFabOpen && fabActions.map((action, idx) => (
+              <motion.div
+                key={action.label}
+                initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.8 }}
+                transition={{ delay: idx * 0.05 }}
+                className="absolute right-0 flex items-center gap-3"
+                style={{ bottom: `${(idx + 1) * 56 + 8}px` }}
+              >
+                <span className="bg-white text-stone-700 text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap">
+                  {action.label}
+                </span>
+                <button
+                  onClick={action.action}
+                  className={`h-11 w-11 rounded-full ${action.color} text-white shadow-lg flex items-center justify-center`}
+                >
+                  <action.icon className="h-5 w-5" />
+                </button>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+          {/* Main FAB */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsFabOpen(!isFabOpen)}
+            className={`relative z-[71] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center border-2 border-white transition-colors ${isFabOpen ? 'bg-stone-700' : 'bg-primary'}`}
           >
-            <Plus className="h-8 w-8" />
-          </Button>
+            <motion.div
+              animate={{ rotate: isFabOpen ? 45 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Plus className="h-7 w-7 text-white" />
+            </motion.div>
+          </motion.button>
         </div>
 
         {/* Quick Assessment Dialog */}
@@ -256,7 +310,10 @@ export default function TeacherLayout({
           setIsQuickOpen(open)
           if (!open) setSelectedStudent(null)
         }}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 bg-stone-50/95 backdrop-blur-xl border-stone-200">
+          <DialogContent
+            className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 bg-stone-50/95 backdrop-blur-xl border-stone-200"
+            onClose={() => { setIsQuickOpen(false); setSelectedStudent(null) }}
+          >
             <DialogHeader className="p-6 pb-2 border-b bg-white">
               <DialogTitle className="text-2xl font-bold flex items-center gap-2">
                 {selectedStudent ? (
