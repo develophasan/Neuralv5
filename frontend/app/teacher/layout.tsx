@@ -164,13 +164,13 @@ export default function TeacherLayout({
     <NotificationProvider userId={session?.user?.id}>
       <div className="flex h-screen w-full flex-col md:flex-row bg-stone-50/30 overflow-hidden">
 
-        {/* Mobile Header */}
-        <div className="md:hidden flex items-center justify-between p-4 bg-white/80 backdrop-blur-md border-b sticky top-0 z-20 shadow-sm">
+        {/* Mobile Header - More compact */}
+        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white/90 backdrop-blur-md border-b sticky top-0 z-20 shadow-sm">
           <div className="flex items-center gap-2">
-            <div className="bg-gradient-to-br from-primary to-primary/80 h-8 w-8 rounded-lg flex items-center justify-center shadow-lg">
-              <Brain className="h-5 w-5 text-white" />
+            <div className="bg-gradient-to-br from-primary to-primary/80 h-7 w-7 rounded-lg flex items-center justify-center shadow-md">
+              <Brain className="h-4 w-4 text-white" />
             </div>
-            <span className="font-bold text-lg text-stone-800 tracking-tight">
+            <span className="font-bold text-base text-stone-800 tracking-tight">
               {currentPage?.label || "Harmoni OS"}
             </span>
           </div>
@@ -196,44 +196,46 @@ export default function TeacherLayout({
             </div>
           </header>
 
-          {/* Scrollable Content */}
-          <main className="flex-1 overflow-auto p-4 md:p-8 pb-24 md:pb-8 relative scroll-smooth focus:scroll-auto">
+          {/* Scrollable Content - Tighter padding on mobile */}
+          <main className="flex-1 overflow-auto p-4 md:p-8 pb-32 md:pb-8 relative scroll-smooth focus:scroll-auto">
             {children}
           </main>
         </div>
 
-        {/* Mobile Bottom Navigation */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-stone-100 px-6 py-2 z-30 flex items-center justify-between shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        {/* Mobile Bottom Navigation - Higher Z and more polished */}
+        <div className="md:hidden fixed bottom-6 left-4 right-4 bg-white/95 backdrop-blur-xl border border-stone-100 px-6 py-3 z-[100] flex items-center justify-between shadow-2xl rounded-3xl">
           {mobileNavItems.map((item) => {
             const isActive = pathname === item.href
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-stone-400'}`}
+                className={`flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary scale-110' : 'text-stone-400'}`}
               >
                 <item.icon className="h-6 w-6" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">{item.label}</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider">{item.label}</span>
               </Link>
             )
           })}
 
-          {/* Menu Button to open sidebar on mobile if needed */}
+          {/* Menu Button */}
           <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
             <SheetTrigger asChild>
               <button className="flex flex-col items-center gap-1 text-stone-400">
                 <MoreHorizontal className="h-6 w-6" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">Menü</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider">Menü</span>
               </button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[85%] max-w-[300px] p-5 pt-8">
-              <TeacherSidebarContent onItemClick={() => setIsMobileOpen(false)} />
+            <SheetContent side="left" className="w-[85%] max-w-[300px] p-0 overflow-hidden">
+              <div className="h-full p-5 pt-8 overflow-y-auto">
+                <TeacherSidebarContent onItemClick={() => setIsMobileOpen(false)} />
+              </div>
             </SheetContent>
           </Sheet>
         </div>
 
-        {/* Floating Action Button (FAB) */}
-        <div className="md:hidden fixed bottom-20 right-4 z-40">
+        {/* Floating Action Button (FAB) - Position adjusted for floating nav */}
+        <div className="md:hidden fixed bottom-28 right-6 z-[101]">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}

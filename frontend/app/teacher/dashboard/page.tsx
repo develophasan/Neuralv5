@@ -92,25 +92,26 @@ export default function TeacherDashboardPage() {
   ]
 
   return (
-    <div className="space-y-8 pb-32">
-      {/* Header - Playful Style */}
+    <div className="space-y-6 pb-32">
+      {/* Header - More Responsive */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center md:text-left"
+          className="text-left"
         >
-          <h1 className="text-3xl md:text-4xl font-playful font-bold text-stone-800 mb-2">
+          <h1 className="text-2xl md:text-4xl font-playful font-bold text-stone-800 mb-1">
             {getGreeting()}, {firstName}! 👋
           </h1>
-          <p className="text-stone-500 text-lg">
-            Bugun sinifinda neler olacak bakalim?
+          <p className="text-stone-500 text-base md:text-lg">
+            Bugün sınıfında neler olacak bakalım?
           </p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
+          className="hidden md:block" // Hide on mobile since we have FAB
         >
           <Button
             onClick={() => setIsQuickOpen(true)}
@@ -123,101 +124,37 @@ export default function TeacherDashboardPage() {
         </motion.div>
       </div>
 
-      {/* Quick Assessment Modal */}
-      <Dialog open={isQuickOpen} onOpenChange={(open) => {
-        setIsQuickOpen(open)
-        if (!open) setSelectedStudent(null)
-      }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 bg-stone-50/95 backdrop-blur-xl border-stone-200">
-          <DialogHeader className="p-6 pb-2 border-b bg-white">
-            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-              {selectedStudent ? (
-                <>
-                  <button onClick={() => setSelectedStudent(null)} className="text-stone-400 hover:text-stone-600 transition-colors">
-                    <ChevronRight className="h-6 w-6 rotate-180" />
-                  </button>
-                  <span className="text-neuro-purple">{selectedStudent.firstName}</span> için Değerlendirme
-                </>
-              ) : (
-                <>
-                  <Brain className="h-6 w-6 text-neuro-purple" />
-                  Öğrenci Seçimi
-                </>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="flex-1 overflow-y-auto p-6">
-            {!selectedStudent ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {studentsLoading ? (
-                  <p className="col-span-3 text-center py-8 text-stone-400">Öğrenciler yükleniyor...</p>
-                ) : allStudents.length === 0 ? (
-                  <p className="col-span-3 text-center py-8 text-stone-400">Henüz öğrenci bulunmuyor.</p>
-                ) : (
-                  allStudents.map((student: any) => (
-                    <motion.button
-                      key={student.id}
-                      onClick={() => setSelectedStudent(student)}
-                      whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,1)' }}
-                      whileTap={{ scale: 0.98 }}
-                      className="flex flex-col items-center p-4 rounded-xl bg-white border border-stone-200 shadow-sm hover:shadow-md hover:border-neuro-purple/30 transition-all group"
-                    >
-                      <div className="h-16 w-16 rounded-full bg-stone-100 mb-3 overflow-hidden group-hover:ring-4 ring-neuro-purple/10 transition-all flex items-center justify-center text-2xl">
-                        {student.photoUrl ? (
-                          <img src={student.photoUrl} alt={student.firstName} className="h-full w-full object-cover" />
-                        ) : (
-                          <span>🧒</span>
-                        )}
-                      </div>
-                      <h3 className="font-bold text-stone-700">{student.firstName}</h3>
-                      <p className="text-xs text-stone-400">{student.lastName}</p>
-                    </motion.button>
-                  ))
-                )}
-              </div>
-            ) : (
-              <QuickAssessment
-                studentId={selectedStudent.id}
-                onComplete={() => setIsQuickOpen(false)}
-                onClose={() => setSelectedStudent(null)}
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Quick Action Buttons - Glassmorphism Style */}
+      {/* Quick Action Buttons - Improved for mobile screens */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-6"
+        className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6"
       >
         {[
-          { href: "/teacher/assessments/new", icon: Star, label: "Değerlendirme", desc: "Yeni kayıt", color: "from-amber-400 to-orange-500", glow: "glow-gold" },
-          { href: "/teacher/daily-logs", icon: Calendar, label: "Günlük Log", desc: "Takip et", color: "from-emerald-400 to-teal-600", glow: "glow-sapphire" },
-          { href: "/teacher/mood-tracker", icon: Smile, label: "Duygu Takibi", desc: "Sınıf ruhu", color: "from-pink-400 to-rose-600", glow: "" },
-          { href: "/teacher/students", icon: Users, label: "Öğrenciler", desc: "Liste ve profil", color: "from-indigo-400 to-indigo-700", glow: "glow-sapphire" },
+          { href: "/teacher/assessments", icon: Star, label: "Değerlendirme", desc: "Yeni kayıt", color: "from-amber-400 to-orange-500" },
+          { href: "/teacher/daily-logs", icon: Calendar, label: "Günlük Log", desc: "Takip et", color: "from-emerald-400 to-teal-600" },
+          { href: "/teacher/mood-tracker", icon: Smile, label: "Duygu Takibi", desc: "Sınıf ruhu", color: "from-pink-400 to-rose-600" },
+          { href: "/teacher/students", icon: Users, label: "Öğrenciler", desc: "Liste", color: "from-indigo-400 to-indigo-700" },
         ].map((action, i) => (
           <Link key={i} href={action.href}>
             <motion.div
               whileHover={{ y: -5 }}
-              className={`p-6 rounded-[2rem] bg-gradient-to-br ${action.color} text-white shadow-xl flex flex-col items-center justify-center gap-2 group transition-all duration-300 relative overflow-hidden`}
+              whileTap={{ scale: 0.95 }}
+              className={`p-4 md:p-6 rounded-2xl md:rounded-[2rem] bg-gradient-to-br ${action.color} text-white shadow-lg flex flex-col items-center justify-center gap-2 group transition-all duration-300 relative overflow-hidden`}
             >
-              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <action.icon className="h-8 w-8 mb-1 group-hover:scale-110 transition-transform" />
-              <div className="text-center">
-                <p className="font-bold text-lg leading-tight">{action.label}</p>
-                <p className="text-[10px] opacity-80 font-medium uppercase tracking-wider">{action.desc}</p>
+              <action.icon className="h-6 w-6 md:h-8 md:w-8 mb-1" />
+              <div className="text-center overflow-hidden w-full">
+                <p className="font-bold text-sm md:text-lg leading-tight truncate">{action.label}</p>
+                <p className="hidden md:block text-[10px] opacity-80 font-medium uppercase tracking-wider">{action.desc}</p>
               </div>
             </motion.div>
           </Link>
         ))}
       </motion.div>
 
-      {/* Stats Grid - Minimalist Premium */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Stats Grid - Vertical on mobile */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {loading ? (
           <>
             <StatCardSkeleton />
@@ -234,14 +171,14 @@ export default function TeacherDashboardPage() {
               transition={{ delay: 0.2 + index * 0.05 }}
             >
               <Link href={stat.href}>
-                <div className="teacher-stat-card-premium group cursor-pointer">
-                  <div className="flex items-center gap-5">
-                    <div className={`h-16 w-16 rounded-2xl ${stat.color} flex items-center justify-center shadow-lg group-hover:rotate-6 transition-transform`}>
-                      <stat.icon className="h-8 w-8 text-white" />
+                <div className="bg-white p-4 md:p-6 rounded-2xl border border-stone-100 shadow-sm hover:shadow-md transition-all group cursor-pointer h-full">
+                  <div className="flex items-center gap-4">
+                    <div className={`h-12 w-12 md:h-16 md:w-16 rounded-xl ${stat.color} flex items-center justify-center shadow-lg shrink-0`}>
+                      <stat.icon className="h-6 w-6 md:h-8 md:w-8 text-white" />
                     </div>
-                    <div>
-                      <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">{stat.label}</p>
-                      <p className="text-3xl font-black text-slate-900">{stat.value}</p>
+                    <div className="min-w-0">
+                      <p className="text-[10px] md:text-xs text-stone-500 font-bold uppercase tracking-widest truncate">{stat.label}</p>
+                      <p className="text-xl md:text-3xl font-black text-stone-900">{stat.value}</p>
                     </div>
                   </div>
                 </div>
@@ -251,8 +188,8 @@ export default function TeacherDashboardPage() {
         )}
       </div>
 
-      {/* Main Content Grid - High Contrast & Depth */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Main Content Grid - Stacked on mobile */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Classes Section */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
@@ -260,15 +197,15 @@ export default function TeacherDashboardPage() {
           transition={{ delay: 0.4 }}
           className="lg:col-span-2"
         >
-          <div className="teacher-card-premium h-full">
-            <div className="flex items-center justify-between mb-8">
+          <div className="bg-white p-6 md:p-8 rounded-3xl border border-stone-100 shadow-sm h-full">
+            <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-heading font-extrabold text-slate-900">Sınıflarım</h2>
-                <p className="text-slate-500 font-medium">Aktif eğitim ve gelişim takibi</p>
+                <h2 className="text-xl md:text-2xl font-bold text-stone-900 tracking-tight">Sınıflarım</h2>
+                <p className="text-sm text-stone-500">Aktif eğitim takibi</p>
               </div>
               <Link href="/teacher/classes">
-                <Button variant="ghost" className="rounded-2xl font-bold bg-slate-50 hover:bg-slate-100 px-6">
-                  Tümü <ChevronRight className="h-4 w-4 ml-2" />
+                <Button variant="ghost" className="rounded-xl font-bold bg-stone-50 hover:bg-stone-100 px-4 h-9">
+                  Tümü <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </Link>
             </div>
@@ -279,28 +216,26 @@ export default function TeacherDashboardPage() {
                 <ClassCardSkeleton />
               </div>
             ) : classes.length === 0 ? (
-              <div className="text-center py-12 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-                <BookOpen className="h-16 w-16 mx-auto text-slate-300 mb-4" />
-                <p className="text-slate-500 font-bold">Henüz sınıf atanmamış</p>
+              <div className="text-center py-12 bg-stone-50 rounded-2xl border-2 border-dashed border-stone-200">
+                <BookOpen className="h-12 w-12 mx-auto text-stone-300 mb-3" />
+                <p className="text-stone-500 font-bold">Henüz sınıf atanmamış</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 {classes.slice(0, 4).map((cls: any, index: number) => (
                   <Link key={cls.id} href={`/teacher/classes/${cls.id}`}>
-                    <div className="group flex items-center gap-5 p-5 rounded-[1.5rem] bg-slate-50/50 border border-slate-100 hover:border-indigo-200 hover:bg-white hover:shadow-xl transition-all duration-300 cursor-pointer">
-                      <div className={`h-16 w-16 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-md group-hover:scale-110 transition-transform ${index % 4 === 0 ? 'bg-indigo-500' : index % 4 === 1 ? 'bg-amber-500' : index % 4 === 2 ? 'bg-emerald-500' : 'bg-rose-500'
+                    <div className="group flex items-center gap-4 p-4 rounded-2xl bg-stone-50/50 border border-stone-100 hover:bg-white hover:shadow-lg transition-all cursor-pointer">
+                      <div className={`h-12 w-12 md:h-14 md:w-14 rounded-xl flex items-center justify-center text-white font-bold text-lg shrink-0 ${index % 4 === 0 ? 'bg-indigo-500' : index % 4 === 1 ? 'bg-amber-500' : index % 4 === 2 ? 'bg-emerald-500' : 'bg-rose-500'
                         }`}>
                         {cls.name?.substring(0, 2)}
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-extrabold text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">{cls.name}</h3>
-                        <p className="text-sm text-slate-500 font-medium">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-bold text-stone-900 truncate">{cls.name}</h3>
+                        <p className="text-xs text-stone-500">
                           {cls.ageGroup} yaş • {cls.student_count || 0} öğrenci
                         </p>
                       </div>
-                      <div className="h-10 w-10 flex items-center justify-center rounded-full bg-white opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
-                        <ChevronRight className="h-5 w-5 text-indigo-600" />
-                      </div>
+                      <ChevronRight className="h-4 w-4 text-stone-300 group-hover:text-primary transition-colors" />
                     </div>
                   </Link>
                 ))}
@@ -309,71 +244,57 @@ export default function TeacherDashboardPage() {
           </div>
         </motion.div>
 
-        {/* AI Insight Section - Ultra Premium Look */}
+        {/* AI Insight Section */}
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <div className="teacher-card-premium h-full bg-gradient-to-br from-indigo-900 to-blue-900 border-0 p-1">
-            <div className="h-full w-full bg-indigo-950/40 backdrop-blur-3xl rounded-[1.9rem] p-8 flex flex-col">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="h-12 w-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center">
-                  <Sparkles className="h-6 w-6 text-amber-400 animate-pulse" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-heading font-extrabold text-white">AI Vision</h2>
-                  <p className="text-indigo-300/80 text-xs font-bold uppercase tracking-widest">Akıllı Sınıf Analizi</p>
-                </div>
+          <div className="bg-gradient-to-br from-indigo-900 to-blue-950 p-6 md:p-8 rounded-3xl text-white shadow-xl h-full flex flex-col">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center">
+                <Sparkles className="h-5 w-5 text-amber-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">AI Vision</h2>
+                <p className="text-indigo-300/60 text-[10px] font-bold uppercase tracking-wider">Akıllı Analiz</p>
+              </div>
+            </div>
+
+            <div className="flex-1 space-y-4">
+              <div className="p-5 bg-white/5 rounded-2xl border border-white/10">
+                <h4 className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-2">
+                  {insightLoading ? "Analiz Ediliyor..." : insight?.insightTitle || "Grup Dinamiği"}
+                </h4>
+                {insightLoading ? (
+                  <div className="space-y-2">
+                    <div className="h-3 bg-white/10 rounded w-full animate-pulse" />
+                    <div className="h-3 bg-white/10 rounded w-4/5 animate-pulse" />
+                  </div>
+                ) : (
+                  <p className="text-sm md:text-base font-medium leading-relaxed">
+                    "{insight?.advice || 'Günlük verilerin tamamlanması bekleniyor...'}"
+                  </p>
+                )}
               </div>
 
-              <div className="flex-1 space-y-6">
-                <motion.div
-                  className="p-6 bg-white/5 backdrop-blur-xl rounded-[1.5rem] border border-white/10 shadow-2xl relative overflow-hidden group"
-                  whileHover={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
-                >
-                  <Brain className="absolute -right-6 -bottom-6 h-24 w-24 text-white/5 group-hover:rotate-12 transition-transform" />
-                  <div className="relative">
-                    <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-[0.2em] mb-3">
-                      {insightLoading ? "Analiz Ediliyor..." : insight?.insightTitle || "Grup Dinamiği"}
-                    </h4>
-                    {insightLoading ? (
-                      <div className="space-y-3">
-                        <div className="h-4 bg-white/10 rounded w-full animate-pulse"></div>
-                        <div className="h-4 bg-white/10 rounded w-5/6 animate-pulse"></div>
-                      </div>
-                    ) : (
-                      <p className="text-white text-lg font-medium leading-relaxed">
-                        "{insight?.advice || 'Günlük verilerin tamamlanması bekleniyor...'}"
-                      </p>
-                    )}
-                  </div>
-                </motion.div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-indigo-500/10 rounded-2xl border border-white/5">
-                    <p className="text-[10px] font-bold text-indigo-300 uppercase mb-1">Odak</p>
-                    <p className="text-sm font-black text-white">{insight?.focusArea || '-'}</p>
-                  </div>
-                  <div className="p-4 bg-emerald-500/10 rounded-2xl border border-white/5">
-                    <p className="text-[10px] font-bold text-emerald-300 uppercase mb-1">Mod</p>
-                    <p className="text-sm font-black text-white">{insight?.groupMode || '-'}</p>
-                  </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                  <p className="text-[9px] font-bold text-indigo-300 uppercase mb-0.5">Odak</p>
+                  <p className="text-xs font-bold truncate">{insight?.focusArea || '-'}</p>
+                </div>
+                <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                  <p className="text-[9px] font-bold text-emerald-300 uppercase mb-0.5">Mod</p>
+                  <p className="text-xs font-bold truncate">{insight?.groupMode || '-'}</p>
                 </div>
               </div>
+            </div>
 
-              <div className="mt-8 pt-6 border-t border-white/5">
-                <div className="flex items-center justify-between">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3].map(i => (
-                      <div key={i} className="h-8 w-8 rounded-full border-2 border-indigo-900 bg-indigo-500 text-[10px] flex items-center justify-center font-bold text-white">
-                        {i}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-indigo-300/60 font-medium">V3 Quantum Engine Aktif</p>
-                </div>
+            <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-[10px] text-indigo-300/40 font-medium">
+              <div className="flex -space-x-1.5">
+                {[1, 2, 3].map(i => <div key={i} className="h-5 w-5 rounded-full border border-indigo-900 bg-indigo-500/50" />)}
               </div>
+              <span>V3 Quantum Active</span>
             </div>
           </div>
         </motion.div>
