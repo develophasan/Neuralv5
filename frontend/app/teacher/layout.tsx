@@ -275,14 +275,23 @@ export default function TeacherLayout({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.8 }}
                 transition={{ delay: idx * 0.05 }}
-                className="absolute right-0 flex items-center gap-3"
-                style={{ bottom: `${(idx + 1) * 56 + 8}px` }}
+                className="absolute right-0 flex items-center gap-3 z-[72] pointer-events-auto"
+                style={{ bottom: `${(idx + 1) * 60 + 8}px` }}
               >
-                <span className="bg-white text-stone-700 text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap">
-                  {action.label}
-                </span>
                 <button
-                  onClick={action.action}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    action.action();
+                  }}
+                  className="bg-white text-stone-700 text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap"
+                >
+                  {action.label}
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    action.action();
+                  }}
                   className={`h-11 w-11 rounded-full ${action.color} text-white shadow-lg flex items-center justify-center`}
                 >
                   <action.icon className="h-5 w-5" />
