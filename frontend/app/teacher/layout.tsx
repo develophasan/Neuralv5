@@ -194,8 +194,8 @@ export default function TeacherLayout({
 
         {/* Sidebar Sheet - Single controlled instance */}
         <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
-          <SheetContent side="left" className="w-[280px] p-0 border-r-0">
-            <div className="h-full overflow-y-auto p-5 pt-12 pb-4">
+          <SheetContent side="left" className="w-[280px] p-0 border-r-0 z-[150]">
+            <div className="h-full flex flex-col p-5 pt-12 pb-20 md:pb-4">
               <TeacherSidebarContent onItemClick={() => setIsMobileOpen(false)} />
             </div>
           </SheetContent>
